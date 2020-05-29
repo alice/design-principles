@@ -95,15 +95,19 @@ See also:
 
 <h3 id="safe-to-browse">It should be safe to visit a web page</h3>
 
-Hyperlinks, links from one page to another, are one of the foundations of the Web.
+Any new feature should preserve the user expectation 
+that visiting a web page is generally safe.
 
-Following a link, or visiting a web page, should be safe:
-users doing this
-should not have to fear for the security of their computer
-or for essential aspects of their privacy.
-(But it's not completely safe,
-in the sense that users may face consequences
-if their use of the Web is harming others.)
+The Web is named for its hyperlinked structure.
+In order for the web to remain vibrant,
+users need to have confidence that merely visiting any given link
+will not have implications for the security of their computer,
+or for any essential aspects of their privacy.
+
+<p class="example">
+For example, an API ...
+</p>
+
 Furthermore, users should understand that it is safe (and how it isn't)
 so they can make informed decisions between use of the Web versus other technologies.
 
