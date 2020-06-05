@@ -68,6 +68,9 @@ urlPrefix: https://url.spec.whatwg.org/; spec: URL;
 If a trade-off needs to be made,
 always put user needs above all.
 
+Similarly, when beginning to design an API,
+be sure to understand and document the user need that the API aims to address.
+
 [The internet is for end users](https://intarchboard.github.io/for-the-users/draft-iab-for-the-users.html):
 any change made to the web platform has the potential to affect vast numbers of people,
 and may have a profound impact on any person's life.
@@ -76,9 +79,6 @@ User needs come before the needs of web page authors,
 which come before than the needs of user agent implementors,
 which come before than the needs of specification writers,
 which come before theoretical purity.
-
-Similarly, when beginning to design an API,
-be sure to understand and document the user need that the API aims to address.
 
 Like all principles,
 this is not absolute.
@@ -109,8 +109,8 @@ For example, an API which allows any website to
 may make users of these technologies feel unsafe visiting unknown web pages,
 since any web page may detect this private information.
 
-Ensuring that users may have a realistic expectation of safety
-allows users to make informed decisions
+If users have a realistic expectation of safety,
+they can make informed decisions
 between Web-based technologies and other technologies.
 For example, users may choose to use a web-based food ordering page,
 rather than installing an app,
@@ -134,6 +134,7 @@ However, this benefit needs to be weighed against the common goal
 of users having a reasonable expectation of safety on web pages.
 
 See also:
+
 * [Security and Privacy Self-Review](https://www.w3.org/TR/security-privacy-questionnaire/)
 
 <h3 id="trusted-ui">Trusted user interface should be trustworthy</h3>
@@ -164,11 +165,11 @@ If this feature was proposed today, it would probably not proceed.
 <h3 id="consent">Ask users for meaningful consent when appropriate</h3>
 
 If a useful feature has the potential to cause harm to users
-if used by a Web page without the user's knowledge,
-the user must be able to give _meaningful consent_ for that feature to be used,
-or refuse consent effectively.
+if it is used by a Web page without the user's knowledge,
+the user must be able to give *meaningful consent* for that feature to be used,
+or to refuse consent effectively.
 
-In order to give _meaningful consent_, the user must:
+In order to give *meaningful consent*, the user must:
 - **understand** what permission they may choose whether to grant the web page
 - be able to choose to give or refuse that permission **effectively**.
 
@@ -217,25 +218,28 @@ may be used to generate printed media,
 and may be interacted with in a large number of different ways.
 New features should match the existing flexibility of the Web platform.
 
-<p class="note">
-This does not imply that features which don't work in _every_ possible context should be excluded.
+<div class="note">
+This does not imply that features which don't work in *every• possible context should be excluded.
 For example, hyperlinks can't be visited when printed on paper,
 and the ''click'' event doesn't translate perfectly to touch input devices
-where positioning and clicking the pointer occur in the same gesture.
+where positioning and clicking the pointer occur in the same gesture (a "tap").
+
 These features still work across a wide variety of contexts,
 and can be adapted to devices that don't support their original intent -
 for example, a tap on a mobile device will fire a ''click'' event as a fallback.
-</p>
+</div>
 
 Features should also be designed so that the easiest way to use them
 maintains flexibility.
-For example,
-the [`display: block`](https://www.w3.org/TR/CSS2/visuren.html#block-formatting),
-[`display: flex`](https://drafts.csswg.org/css-flexbox-1/#box-model),
-and [`display: grid`](https://www.w3.org/TR/css-grid-1/#grid-containers) layout models in CSS
+
+<div class="example">
+The <a href="https://www.w3.org/TR/CSS2/visuren.html#block-formatting">`display: block`</a>,
+<a href="https://drafts.csswg.org/css-flexbox-1/#box-model">`display: flex`</a>
+and <a href="https://www.w3.org/TR/css-grid-1/#grid-containers">`display: grid`</a> layout models in CSS
 all default to placing content within the available space and without overlap,
 so that it works across screen sizes,
 and allows users to choose their own font and font size without causing text to overflow.
+</div>
 
 <h2 id="api-across-languages">API Design Across Languages</h2>
 
@@ -246,14 +250,18 @@ Simple solutions are generally better than complex solutions,
 although they may be harder to find.
 Simpler features are easier for user agents to implement and test,
 more likely to be interoperable,
-and easier for authors to understand. See related [[LEAST-POWER]]
+and easier for authors to understand. 
 
-<h3 id="naming-is-hard">Name things thoughtfully</h3>
+See also:
+
+* [[LEAST-POWER]]
+
+<h3 id="name-thoughtfully">Name things thoughtfully</h3>
 
 Name APIs with care.
 Naming APIs well makes it much easier for authors to use them correctly.
 
-See the more detailed <a href="#naming-principles">Naming principles</a> section
+See the more detailed <a href="#naming-is-hard">Naming principles</a> section
 for specific guidance on naming.
 
 <h3 id="feature-detect">New features should be detectable</h3>
@@ -265,6 +273,7 @@ An existing feature may not be available on a page for a number of reasons, incl
 - because it has not been implmented yet, or
 - because it is only available in <a href="#secure-context">secure contexts</a>, or
 - because the user denied the page permission to use the feature.
+
 The way that the feature's presence is exposed to the page
 should be identical in any case:
 authors should not need to write different code to handle each scenario,
@@ -292,8 +301,9 @@ if feature detection were available for the feature,
 then feature detection should not be provided.
 
 See also:
-[[#do-not-expose-use-of-private-browsing-mode]]
-[[#do-not-expose-use-of-assistive-tech]]
+
+* [[#do-not-expose-use-of-private-browsing-mode]]
+* [[#do-not-expose-use-of-assistive-tech]]
 
 <h3 id="secure-context">Consider limiting new features to secure contexts</h3>
 
@@ -305,13 +315,13 @@ without the authentication, integrity, or confidentiality
 that is present only in secure contexts,
 then the feature **must** be limited to secure contexts.
 One example of a feature that should be limited to secure contexts
-is [Geolocation}(https://www.w3.org/TR/geolocation-API/),
+is [Geolocation](https://www.w3.org/TR/geolocation-API/),
 since it would be a risk to users' privacy to transmit their location in an insecure way.
 
 For other features, it should be weighed carefully whether user needs are best served
 by making the feature available in an insecure context.
 
-<p class="note">
+<div class="note">
 Specification authors can limit most features defined in
 <a href="https://heycam.github.io/webidl/">Web IDL</a>,
 to secure contexts
@@ -321,18 +331,19 @@ on interfaces, namespaces, or their members (such as methods and attributes).
 However, for some types of API (e.g., dispatching an event),
 limitation to secure contexts should just
 be defined in normative prose in the specification.
-</p>
+</div>
 
-<p class="note">
+<div class="note">
 As described in [[#feature-detect]],
 there should be a way to programmatically detect whether a feature is available,
 including cases where the feature is unavailable because the context is not secure.
+
 However, if, for some reason
 there is no way for code to gracefully handle the feature not being present,
 limiting the feature to secure contexts
 might cause problems
 for code (such as libraries) that may be used in either secure or non-secure contexts.
-</p>
+</div>
 
 <h3 id="do-not-expose-use-of-private-browsing-mode">Do not reveal that private browsing mode is engaged</h3>
 
@@ -452,319 +463,144 @@ which do not reveal the use of assistive technology.
 
 </div>
 
-See also
+See also:
 
 * [Web Technology Accessibility Guidelines](https://w3c.github.io/apa/fast/)
 * [Security and privacy are essential](https://www.w3.org/2001/tag/doc/ethical-web-principles/#privacy)
 * [What data does this specification expose to an origin?](https://www.w3.org/TR/security-privacy-questionnaire/#underlying-platform-data)
 
-<h2 id="css">Cascading Style Sheets (CSS)</h2>
-
-<h3 id="css-property-separation">Separate CSS properties based on what should cascade separately</h3>
-
-Deciding which values should be grouped together as CSS properties
-and which should be separate properties
-should be based on what makes sense to set independently.
-
-[CSS cascading](https://www.w3.org/TR/2011/REC-CSS2-20110607/cascade.html#cascade)
-allows [declarations](https://www.w3.org/TR/2011/REC-CSS2-20110607/syndata.html#declaration)
-from different rules or different style sheets
-to override one another.
-If there is a logical set of attributes which should all be overridden together,
-they should be grouped together in a single property so that they cascade together.
-Likewise, if there are attributes which should be able to be overridden independently,
-they should be separate properties.
-
-<p class="example">For example, the "size" and "sink" aspects of the ['initial-letter'](https://drafts.csswg.org/css-inline/#sizing-drop-initials) property
-belong in a single property
-because they are part of a single initial letter effect
-(e.g., a drop cap, sunken cap, or raised cap).
-However, the ['initial-letter-align'](https://drafts.csswg.org/css-inline/#aligning-initial-letter) property should be separate because it
-sets an alignment policy for all of these effects across the document
-which is a general stylistic choice
-and a function of the script (e.g., Latin, Cyrillic, Arabic) used in the document.
-</p>
-
-<h3 id="css-inherited-or-not">Make appropriate choices for whether CSS properties are inherited</h3>
-
-Deciding whether a property should be [inherited](https://www.w3.org/TR/2011/REC-CSS2-20110607/cascade.html#inheritance) should depend on whether
-the effect of the property should be overridden or added to
-if set on an ancestor as well as a descendant.
-
-If setting the property on a descendant element needs to override (rather than add to)
-the effect of setting it on an ancestor,
-then the property should probably be inherited.
-If setting the property on a descendant element is a separate effect
-that adds to setting it on an ancestor,
-then the property should probably not be inherited.
-
-For example, if a property has an effect on text,
-then it is almost always true that
-a descendant element needs to override (rather than add to)
-the effect of setting it on an ancestor,
-and the property should be inherited.
-This is also needed to maintain the design principle that
-inserting an unstyled inline element around a piece of text
-does not change the appearance of that text.
-
-A specification of an non-inherited property requiring that the handling of an element
-look at the value of that property on its ancestors (which may also be slow)
-is a "code smell" that suggests that the property likely should have been inherited.
-
-Likewise, a specification of an inherited property requiring that the handling of an element
-ignore the value of a property if it's the same as the value on the parent element
-is a "code smell" that suggests that the property likely should not have been inherited.
-
-<div class="example">
-For example, the
-['background-image'](https://www.w3.org/TR/CSS2/colors.html#propdef-background-image) property
-is **not** inherited.
-
-If the 'background-image' property had been inherited,
-then the specification would have had to create a good bit of complexity
-to avoid a partially-transparent image
-being visibly repeated for each descendant element.
-This complexity probably would have involved
-behaving differently if the property had the same value on the parent element,
-which is the "code smell" mentioned above that suggests
-that a property likely should not have been inherited.
-</div>
-
-<div class="example">
-Another example is the 'font-size' property, which **is** inherited.
-It sets the size of the font used for the text in the element,
-and continues to apply to any descendants that don't
-have a declaration setting 'font-size' to a different value.
-
-If the 'font-size' property were not inherited,
-then it would probably have to have an initial value
-that requires walking up the ancestor chain to find the nearest ancestor
-that doesn't have that value.
-This is the "code smell" mentioned above that suggests
-that a property likely should have been inherited.
-</div>
-
-<div class="example">
-A more subtle example is the 'text-decoration' property.
-
-As an inherited property,
-'text-decoration' would draw underlines (or other decorations)
-in the style and position of each piece of text.
-
-As a non-inherited property, it would draw underlines
-in the style and position of the element that specifies 'text-decoration'.
-These behaviors lead to different results
-when the element that has 'text-decoration' declared
-has descendants that are at a different vertical-alignment (e.g., superscripts),
-in a different color,
-or in a different font size.
-
-The property was initially designed as not inherited
-because the behavior of having underlines
-have a consistent color, thickness, and position
-was considered the better behavior.
-
-However, in the end, some of the characteristics of the other behavior
-(such as its interaction with 'visibility' or text selection)
-were also seen as desirable, and it ended up being specified in a somewhat hybrid way
-that does involve the "code smell"
-of walking up the ancestor chain looking for text decorations on ancestors.
-</div>
-
-<h3 id="css-computed-value">Choose the computed value type based on how the property should inherit</h3>
-
-Another important choice in the design of every CSS property
-is what its <a>computed value</a> is.
-This is an abstract description of the value that is inherited when the property inherits.
-It is also important for starting and animation of [=CSS Transitions=].
-This is most important for inherited properties, but it does matter for all properties.
-
-Note: Due to a somewhat unfortunate history,
-this is *not* the value that is returned by {{getComputedStyle()}},
-which is actually the <a>resolved value</a>,
-which can be the result of further computation starting from the computed value.
-
-The definition of a CSS property often has interactions with other CSS properties.
-It is often possible for these interactions to happen at the [=computed value=] stage
-or at a later stage such as the [=used value=].
-Since inheritance operates on the computed value,
-whether an interaction should affect the value that descendants inherit
-is a major factor in the choice of where that interaction should be handled.
-
-<a href="https://wiki.csswg.org/spec/property-dependencies">The dependencies
-that do affect computed values</a>
-are required to not be circular.
-
-Making decisions about whether dependencies should affect computed values
-often involves tradeoffs of complexity.
-Sometimes it is less complex
-for the behavior to happen as part of the computation of the computed value;
-sometimes it is less complex
-for the behavior to happen in whatever handles the computed value.
-(This complexity might be in the specification, in implementations, or both.
-Complexity in implementations might affect how fast things run for end users.)
-
-For more information about computed values, see
-[Computed Values Patterns](https://wiki.csswg.org/spec/computed-values).
-
-<div class="example">
-For example, the 'line-height' property accepts values that are numbers,
-such as ''line-height: 1.4''.
-This value is a multiple of the 'font-size',
-so if the 'font-size' is ''20px'' then this would mean the line height is ''28px''.
-
-However, the computed value in this case is the number ''1.4'', not the length ''28px''.
-This is important because the value can inherit to elements that have a different font size,
-and preserving the "multiple of the current element's font" behavior would be broken
-if it turned into a length at computed-value time:
-
-  <pre highlight=html>
-&lt;body style="line-height: 1.4"&gt;
-
-  &lt;p&gt;For example, this body text has a line height
-  that's 1.4 times its font size.&lt;/p&gt;
-
-  &lt;h2 style="font-size: 200%"&gt;
-    And this heading also has a line-height that's
-    1.4 times the h2's larger font size, and *not*
-    1.4 times the body's font size, which would lead
-    to text overlap
-  &lt;/h2&gt;
-&lt;/body&gt;
-  </pre>
-
-These number values are generally the preferred values to use for 'line-height'
-because they inherit better than length values.
-</div>
-
-<h3 id="css-naming">Naming of CSS properties and values</h3>
-
-The names of CSS properties are usually nouns,
-and the names of their values are usually adjectives (although sometimes nouns).
-
-Words in properties and values are separated by hyphens.
-Abbreviations are generally avoided.
-
-Use the root form of words when possible
-rather than a form with a grammatical prefix or suffix
-(for example, "size" rather than "sizing").
-
-The list of values of a property should generally be chosen
-so that new values can be added.
-Avoid values like ''yes'', ''no'', ''true'', ''false'',
-or things with more complex names that are basically equivalent to them.
-
-Avoid words like "mode" or "state" in the names of properties,
-since properties are generally setting a mode or state.
-
-See [[#naming-is-hard]] for general (cross-language) advice on naming.
-
 <h2 id="js">JavaScript Language</h2>
 
 <h3 id="js-only">Web APIs are for JavaScript</h3>
 
-The language that web APIs are meant to be used in, and specified for, is JavaScript (also known as
-[[!ECMASCRIPT]]). They are not language-agnostic, and are not meant to be.
+When designing imperative APIs for the Web,
+use JavaScript.
+In particular,
+you can freely rely upon language-specific semantics and conventions, 
+with no need to keep things generalized.
 
-This is sometimes a confusing point because [[WEBIDL]] descended from the language-agnostic OMG IDL
-(and at one point, included "Java Bindings"). Even today, the structure of the document contains a
-confusing and redundant division between the "Interface definition language" and the "ECMAScript
-binding". Rest assured that this division is simply a historical artifact of document structure,
-and does not imply anything about the intent of Web IDL in general. The only reason it remains is
-that nobody has taken the time to eradicate it.
+<div class="example">
+For example,
+the {{CustomElementRegistry.define()}} method takes a reference to
+a <a href="https://tc39.es/ecma262/#sec-static-semantics-constructormethod">Constructor Method</a>.
 
-As such, when designing your APIs, your primary concern should be with the interface you present to
-JavaScript developers. You can freely rely upon language-specific semantics and conventions, with
-no need to keep things generalized.
+This takes advantage of the relatively recent addition of Classes to JavaScript,
+and fact that function pointers are very easy to use in JavaScript.
+</div>
+
+<div class="note">
+JavaScript is also known as [[!ECMASCRIPT]]
+</div>
+
+<div class="note">
+[[WEBIDL]] defines a separate "ECMAScript binding" section;
+this is a historical artifact only.
+</div>
 
 <h3 id="js-rtc">Preserve run-to-completion semantics</h3>
 
-Web APIs are essentially vehicles for extruding C++- (or Rust-) authored capabilities into the
-JavaScript code that developers write. As such, it's important to respect the invariants that are
-in play in normal JavaScript code. One of the most important of these is <em>run-to-completion
-semantics</em>: wherein each turn of the JavaScript event loop is processed completely before
-returning control to the user agent.
+Data accessed via JavaScript APIs must not be modified 
+while a JavaScript <a>event loop</a> is running.
 
-In particular, this means that JavaScript functions cannot be preempted mid-execution, and thus
-that any data observed within the function will stay constant as long as that function is active.
-This is not the case in other languages, which allow data races via multithreading or other
-techniques—a C function can be preempted at any time, with the bindings it has access to changing
-values from one line to the next.
+A JavaScript Web API is generally a wrapper around 
+a feature implemented in a lower-level language,
+such as C++ or Rust.
+Unlike those languages,
+JavaScript guarantees <em>run-to-completion semantics</em>:
+any task on the <a>event loop</a> must be completed 
+before control is returned to the user agent.
 
-This no-data-races invariant is extensively relied upon in JavaScript programs. As such, the
-invariant must never be violated—even by web APIs, which are often implemented in languages that
-<em>do</em> allow data races. Although the user agent may be using threads or other techniques to
-modify state <a>in parallel</a>, web APIs must never expose such changing state directly to
-developers. Instead, they should <a>queue a task</a> to modify author-observable state (such as an
-object property).
+<!-- I'm a little worried about "preempt" but not sure what to do about it. -->
+Since JavaScript functions cannot be preempted mid-execution,
+JavaScript code is always written with the assumption 
+that data observed within a function will not change 
+(unless acted on by that function, or code that it calls into).
+
+For this reason,
+if a JavaScript Web API exposes some piece of data,
+such as an Object property,
+that data must not be changed while a JavaScript task is running.
+Instead, if the data changes,
+<a>queue a task</a> to modify the exposed version of the data.
+
+<div class="example">
+If a JavaScript task is has accessed the {{navigator.onLine}} property,
+and the online status of the browser changes,
+the property will not be updated until the next task.
+</div>
 
 <h3 id="js-gc">Do not expose garbage collection</h3>
 
-Web APIs should not expose a way for author code to deduce when/if garbage collection of JavaScript
-objects has run.
+Web APIs should not accidentally expose a way for author code
+to deduce when/if garbage collection of JavaScript objects has run.
 
-Although some APIs may expose garbage collection, such as some implementations of
-{{Document/getElementsByTagName}}, and the JavaScript <a
-href="https://github.com/tc39/proposal-weakrefs">WeakRefs proposal</a> (which has multiple
-implementer support), API designers are strongly encouraged to avoid points in their own APIs that
-depend on this timing.
+The timing of garbage collection varies
+both between user agents,
+and may change as user agents look to improve performance.
+If an API exposes the timing of garbage collection,
+it creates the potential for programs to behave differently
+in different contexts,
+meaning that authors need to write code to handle these differences.
+It may also make it more difficult for user agents
+to implement different garbage collection strategies,
+if there is enough code which depends on timing working a particular way.
 
-The reason for this is somewhat subtle. The more that Web API semantics are affected by garbage
-collection timing (or whether objects are collected at all), the more programs will be affected by
-changes in this timing. But user agents differ significantly in both the timing of garbage
-collection and whether certain objects are collected at all, which means the resulting code will be
-non-interoperable. Worse, according to the usual rules of game theory as applied to browsers, this
-kind of scenario could force other user agents to copy the garbage collection timing of the
-original in order to create interoperability. This would cause current garbage collection
-strategies to ossify, preventing improvement in one of the most dynamic areas of JavaScript
-virtual machine technology.
+This means that you shouldn't expose any API that acts as a weak reference, 
+e.g. with a property that becomes <code highlight="js">null</code> 
+once garbage collection runs.
+Object and data lifetimes in JavaScript code should be predictable.
 
-In particular, this means that you shouldn't expose any API that acts as a weak reference, e.g. with a
-property that becomes <code highlight="js">null</code> once garbage collection runs. Such freeing of
-memory should be entirely deterministic.
+<div class="example">
+{{Document/getElementsByTagName}} is an example of what not to do.
 
-For example, currently, {{Document/getElementsByTagName}} permits reusing the {{HTMLCollection}}
-which it creates, when it's called with the same receiver and tag name. In practice, engines reuse
-the output if it has not been garbage collected. This creates behavior which differs based on the
-details of garbage collection, which is strongly discouraged. If {{Document/getElementsByTagName}}
-were designed today, the advice to the specification authors would be to either reliably reuse
-the output, or to produce a new {{HTMLCollection}} each time it's invoked.
+{{Document/getElementsByTagName}} returns an {{HTMLCollection}} object,
+which may be re-used if the method is called twice on the same Document object,
+with the same tag name.
+In practice,
+this means that the same object will be returned 
+if and only if it has not been garbage collected.
+This means that the behaviour is different depending on 
+the timing of garbage collection.
 
-The case of {{Document/getElementsByTagName}} is particularly insidious because nothing about
-the API visibly relates to garbage collection details. By contrast, special APIs for this particular
-purpose such as `WeakRef` and `FinalizationGroup` have their GC interaction as a specific part of
-their contract with the developer.
+If {{Document/getElementsByTagName}} were designed today, 
+the advice to the designers would be 
+to either reliably reuse the output, 
+or to produce a new {{HTMLCollection}} each time it's invoked.
+</div>
+
+{{Document/getElementsByTagName}} is particularly bad,
+because there is no sign given to the author that
+it may depend on the timing of garbage collection.
+In contrast, an API which is explicitly designed to depend on garbage collection,
+such as `WeakRef` or `FinalizationGroup`,
+sets accurate author expectations about 
+the interaction with garbage collection.
 
 <h2 id="api-surface">JavaScript API Surface Concerns</h2>
 
 <h3 id="attributes-like-data">Attributes should behave like data properties</h3>
 
-[[!WEBIDL]] attributes are reified in JavaScript as accessor properties, i.e. properties with
-separate getter and setter functions which can react independently. This is in contrast to the
-"default" style of JavaScript properties, data properties, which do not have configurable behavior
-but instead can simply be set and retrieved, or optionally marked read-only so that they cannot be
-set.
+[[!WEBIDL]] attributes should act like simple JavaScript object properties,
+even though in reality they are implemented as accessor properties
+with separate getter and setter functions.
 
-Data property semantics are what are generally expected by JavaScript developers when interfacing
-with objects. As such, although getters and setters allow infinite customizability when defining
-your Web IDL attributes, you should endeavor to make the resulting accessor properties behave as
-much like a data property as possible. Specific guidance in this regard includes:
-
-* Getters must not have any (observable) side effects.
-* Getters should not perform any expensive operations. (A notable failure of the platform in this
-    regard is getters like <code highlight="js">offsetTop</code> performing layout; do not repeat this mistake.)
-* Ensure that your attribute's getter returns the same object each time it is called, until some
-    occurrence in another part of the system causes a logical "reset" of the property's value. In
-    particular, <code highlight="js">obj.attribute === obj.attribute</code> must always hold, and so returning a
-    new value from the getter each time is not allowed.
-* Whenever possible, preserve values given to the setter for return from the getter. That is,
-    given <code highlight="js">obj.attribute = x</code>, a subsequent <code highlight="js">obj.attribute === x</code> should be
-    true. (This will not always be the case, e.g. if a normalization or type conversion step is
-    necessary, but should be held as a goal for normal code paths.)
+* Getters must not have any observable side effects.
+* Getters should not perform any complex operations. 
+* Ensure that <code highlight="js">obj.attribute === obj.attribute</code> is always true:
+    do not create a new value each time the getter is called. 
+* If possible, ensure that given <code highlight="js">obj.attribute = x</code>,
+    <code highlight="js">obj.attribute === x</code> is true.
+    (This may not be possible if some kind of conversion is necessary for `x`.)
 
 If you were thinking about using an attribute,
 but it doesn't behave this way,
 you should probably use a method instead.
+
+<div class="example">
+For example, <code highlight="js">offsetTop</code> performs layout, 
+which can be complex and time-consuming.
+It would have been better if this had been a method like {{Element.getBoundingClientRect()}}.
+</div>
 
 <h3 id="live-vs-static">Consider whether objects should be live or static</h3>
 
@@ -791,7 +627,7 @@ a collection changes while being iterated.
 Because of this,
 it is generally considered a mistake that methods like
 {{Document/getElementsByTagName()}} return live objects;
-{{ParentNode/querySelectorAll()}} was made to return static objects
+{{ParentNode/querySelectotrAll()}} was made to return static objects
 as a result of this experience.
 On the other hand, even though {{URLSearchParams}} represents a collection,
 it should be live because the collection is mutated through that object.
@@ -1052,6 +888,197 @@ you should use an object dictionary which contains the state that the
 bitmask is attempting to express, as object dictionaries can then be passed
 around from method to method as needed as easily as the state in a single
 bitmask value.
+
+
+<h2 id="css">Cascading Style Sheets (CSS)</h2>
+
+This section details design principles for features which are exposed via CSS.
+
+See also [[#css-naming]].
+
+<h3 id="css-property-separation">Separate CSS properties based on what should cascade separately</h3>
+
+Deciding which values should be grouped together as CSS properties
+and which should be separate properties
+should be based on what makes sense to set independently.
+
+[CSS cascading](https://www.w3.org/TR/2011/REC-CSS2-20110607/cascade.html#cascade)
+allows [declarations](https://www.w3.org/TR/2011/REC-CSS2-20110607/syndata.html#declaration)
+from different rules or different style sheets
+to override one another.
+If there is a logical set of attributes which should all be overridden together,
+they should be grouped together in a single property so that they cascade together.
+Likewise, if there are attributes which should be able to be overridden independently,
+they should be separate properties.
+
+<div class="example">For example, the "size" and "sink" aspects of the 'initial-letter' property
+belong in a single property
+because they are part of a single initial letter effect
+(e.g., a drop cap, sunken cap, or raised cap).
+
+However, the 'initial-letter-align' property should be separate because it
+sets an alignment policy for all of these effects across the document
+which is a general stylistic choice
+and a function of the script (e.g., Latin, Cyrillic, Arabic) used in the document.
+</div>
+
+<h3 id="css-inherited-or-not">Make appropriate choices for whether CSS properties are inherited</h3>
+
+Deciding whether a property should be [inherited](https://www.w3.org/TR/2011/REC-CSS2-20110607/cascade.html#inheritance) should depend on whether
+the effect of the property should be overridden or added to
+if set on an ancestor as well as a descendant.
+
+If setting the property on a descendant element needs to override (rather than add to)
+the effect of setting it on an ancestor,
+then the property should probably be inherited.
+A specification of an non-inherited property requiring that the handling of an element
+look at the value of that property on its ancestors (which may also be slow)
+is a "code smell" that suggests that the property likely should have been inherited.
+
+If setting the property on a descendant element is a separate effect
+that adds to setting it on an ancestor,
+then the property should probably **not** be inherited.
+A specification of an inherited property requiring that the handling of an element
+ignore the value of a property if it's the same as the value on the parent element
+is a "code smell" that suggests that the property likely should not have been inherited.
+
+<div class="note">
+If a property has an effect on text,
+then it is almost always true that
+a descendant element needs to override (rather than add to)
+the effect of setting it on an ancestor,
+and the property should be inherited.
+This is also needed to maintain the design principle that
+inserting an unstyled inline element around a piece of text
+does not change the appearance of that text.
+</div>
+
+<div class="example">
+For example, the 'background-image' property is **not** inherited.
+
+If the 'background-image' property had been inherited,
+then the specification would have had to create a good bit of complexity
+to avoid a partially-transparent image
+being visibly repeated for each descendant element.
+This complexity probably would have involved
+behaving differently if the property had the same value on the parent element,
+which is the "code smell" mentioned above that suggests
+that a property likely should not have been inherited.
+</div>
+
+<div class="example">
+Another example is the 'font-size' property, which **is** inherited.
+It sets the size of the font used for the text in the element,
+and continues to apply to any descendants that don't
+have a declaration setting 'font-size' to a different value.
+
+If the 'font-size' property were not inherited,
+then it would probably have to have an initial value
+that requires walking up the ancestor chain to find the nearest ancestor
+that doesn't have that value.
+This is the "code smell" mentioned above that suggests
+that a property likely should have been inherited.
+</div>
+
+<!-- This is probably too much detail for this document
+<div class="example">
+A more subtle example is the 'text-decoration' property.
+
+As an inherited property,
+'text-decoration' would draw underlines (or other decorations)
+in the style and position of each piece of text.
+
+As a non-inherited property, it would draw underlines
+in the style and position of the element that specifies 'text-decoration'.
+These behaviors lead to different results
+when the element that has 'text-decoration' declared
+has descendants that are at a different vertical-alignment (e.g., superscripts),
+in a different color,
+or in a different font size.
+
+The property was initially designed as not inherited
+because the behavior of having underlines
+have a consistent color, thickness, and position
+was considered the better behavior.
+
+However, in the end, some of the characteristics of the other behavior
+(such as its interaction with 'visibility' or text selection)
+were also seen as desirable, and it ended up being specified in a somewhat hybrid way
+that does involve the "code smell"
+of walking up the ancestor chain looking for text decorations on ancestors.
+</div>
+-->
+
+<h3 id="css-computed-value">Choose the computed value type based on how the property should inherit</h3>
+
+The <a>computed value</a> of a CSS property
+should be chosen based on how it will [=inherit=],
+and the other properties which may depend on it,
+whether or not it has been inherited.
+
+<div class="note">
+Note: the <a>computed value</a> should not be confused with the [=resolved value=]
+which is returned from the {{getComputedStyle()}} method.
+</div>
+
+Certain CSS properties are calculated with 
+<a href="https://wiki.csswg.org/spec/property-dependencies">dependencies</a>
+on others:
+for example, the <a>computed value</a>
+of a property specified in 'lh' units 
+depends on the 'line-height' property which applies to the element being considered.
+The <a>computed value</a> for a property should be chosen
+so that the dependent values make sense,
+regardless of whether they are inherited.
+
+<div class="example">
+For example, the 'line-height' property may accept a <<number>> value,
+such as ''line-height: 1.4''.
+This value represents a multiple of the 'font-size',
+so if the 'font-size' is ''20px'', 
+the [=actual value=] for the line height is ''28px''.
+
+However, the <a>computed value</a> in this case is the <<number>> ''1.4'', 
+not the <<length>> ''28px''.
+
+The 'line-height' property can be inherited 
+into elements that have a different 'font-size',
+and any property on those elements which depends on 'line-height'
+must take the relevant 'font-size' into account,
+rather than the 'font-size' for the element from which 
+the 'line-height' value was inherited.
+
+  <pre highlight=html>
+&lt;body style="font-size: 20px; line-height: 1.4"&gt;
+
+  &lt;p&gt;This body text has a line height of 28px.&lt;/p&gt;
+
+  &lt;h2 style="font-size: 200%"&gt;
+    This heading has a line-height of 56px,
+    not 28px, even though the line-height was declared on the body.
+    This means that the 40px font won't overflow the line height.
+  &lt;/h2&gt;
+&lt;/body&gt;
+  </pre>
+
+These number values are generally the preferred values to use for 'line-height'
+because they inherit better than length values.
+</div>
+
+<!-- This paragraph is hard to understand, but I don't know how to improve it 
+Making decisions about whether dependencies should affect computed values
+often involves tradeoffs of complexity.
+Sometimes it is less complex
+for the behavior to happen as part of the computation of the computed value;
+sometimes it is less complex
+for the behavior to happen in whatever handles the computed value.
+(This complexity might be in the specification, in implementations, or both.
+Complexity in implementations might affect how fast things run for end users.)
+-->
+
+See also:
+
+* [Computed Values Patterns](https://wiki.csswg.org/spec/computed-values)
 
 <h2 id="event-design">Event Design</h2>
 
@@ -1935,7 +1962,7 @@ and makes it clear when the state described by the flags is reset.
 
 <!-- TODO: add examples -->
 
-<h2 id="naming-advice">Detailed naming advice</a>
+<h2 id="naming-is-hard">Naming principles</h2>
 
 Names take meaning from:
 
@@ -1943,7 +1970,7 @@ Names take meaning from:
 * use (how people come to understand the name over time)
 * context (the object on the left-hand side, for example)
 
-<h3 id="naming-common-words" class="no-num no-toc">Use common words</h4>
+<h3 id="naming-common-words">Use common words</h4>
 
 API naming *must* be done in easily readable US English.
 Keep in mind that most web developers are not native English speakers.
@@ -1977,12 +2004,12 @@ to name this API less directly connected to its return type. [[FETCH]]
 
 </div>
 
-<h3 id="naming-charset" class="no-num no-toc">Use ASCII names</h4>
+<h3 id="naming-charset">Use ASCII names</h4>
 
 Names must adhere to the local language restrictions, for example CSS ident rules etc.
 and *should* be in the [=ascii code point|ASCII range=].
 
-<h3 id="naming-consultation" class="no-num no-toc">Consultation</h4>
+<h3 id="naming-consultation">Consultation</h4>
 
 Please consult widely on names in your APIs.
 
@@ -2007,7 +2034,7 @@ when editing that document. [[URL]]
 
 </div>
 
-<h3 id="naming-future-proofing" class="no-num no-toc">Future-proofing</h4>
+<h3 id="naming-future-proofing">Future-proofing</h4>
 
 Naming should be generic and future-proof whenever possible.
 
@@ -2034,7 +2061,7 @@ as they were to PS/2 and ADB keyboards back then. [[UIEVENTS]]
 
 </div>
 
-<h3 id="naming-consistency" class="no-num no-toc">Consistency</h4>
+<h3 id="naming-consistency">Consistency</h4>
 Naming schemes should aim for consistency, to avoid confusion.
 
 Sets of related names should agree with each other in:
@@ -2134,7 +2161,7 @@ examples that violate the above rules are {{XMLHttpRequest}} and
 initialisms, even if they are repeated.
 </div>
 
-<h3 id="naming-unsafe" class="no-num no-toc">Warning about dangerous features</h4>
+<h3 id="naming-unsafe">Warning about dangerous features</h4>
 
 Where possible, mark features that weaken
 the guarantees provided to developers
@@ -2146,6 +2173,27 @@ provides protection against certain types of content injection vulnerabilities.
 CSP also provides features that weaken this guarantee,
 such as the `unsafe-inline` keyword,
 which reduces CSP's own protections by allowing inline scripts.
+
+<h3 id="css-naming">Naming of CSS properties and values</h3>
+
+The names of CSS properties are usually nouns,
+and the names of their values are usually adjectives (although sometimes nouns).
+
+Words in properties and values are separated by hyphens.
+Abbreviations are generally avoided.
+
+Use the root form of words when possible
+rather than a form with a grammatical prefix or suffix
+(for example, "size" rather than "sizing").
+
+The list of values of a property should generally be chosen
+so that new values can be added.
+Avoid values like ''yes'', ''no'', ''true'', ''false'',
+or things with more complex names that are basically equivalent to them.
+
+Avoid words like "mode" or "state" in the names of properties,
+since properties are generally setting a mode or state.
+
 
 <h3 id="writing-resources">Other resources</h3>
 
