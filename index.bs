@@ -81,7 +81,8 @@ See also:
 
 <h3 id="safe-to-browse">It should be safe to visit a web page</h3>
 
-Any new feature should preserve the user expectation
+When adding new features,
+design them to preserve the user expectation
 that visiting a web page is generally safe.
 
 The Web is named for its hyperlinked structure.
@@ -125,8 +126,7 @@ See also:
 
 <h3 id="trusted-ui">Trusted user interface should be trustworthy</h3>
 
-When we add new features to the web,
-we should consider whether the new feature impacts trusted user interfaces.
+Consider whether new features impact trusted user interfaces.
 
 Users depend on trusted user interfaces
 such as the address bar,
@@ -150,10 +150,9 @@ If this feature was proposed today, it would probably not proceed.
 
 <h3 id="consent">Ask users for meaningful consent when appropriate</h3>
 
-If a useful feature has the potential to cause harm to users
-if it is used by a Web page without the user's knowledge,
-the user must be able to give *meaningful consent* for that feature to be used,
-or to refuse consent effectively.
+If a useful feature has the potential to cause harm to users,
+make sure that the user can give *meaningful consent* for that feature to be used,
+and that they can refuse consent effectively.
 
 In order to give *meaningful consent*, the user must:
 - **understand** what permission they may choose whether to grant the web page
@@ -161,11 +160,12 @@ In order to give *meaningful consent*, the user must:
 
 If a feature is powerful enough to require a user consent,
 but it is not possible to explain to a typical user what they are consenting to,
-that is a signal that the design of the feature may need to be reconsidered.
+that is a signal that you may need to reconsider the design of the feature.
 
 If a permission prompt is shown,
 and the user does not grant permission,
-then it should not be possible for the Web page to do anything that the user believes they have refused consent for.
+the Web page should not be able to do anything 
+that the user believes they have refused consent for.
 
 By asking for consent,
 we can inform the user of what capabilities the web page does or does not have,
@@ -193,7 +193,7 @@ no location information is available to the Web page.
 <!-- was "Media Independence" in the HTML Design Principles -->
 
 As much as possible,
-features on the web should work across different input and output devices,
+ensure that features on the web work across different input and output devices,
 different screen sizes, different interaction modes,
 different platforms, and different media.
 
@@ -232,11 +232,18 @@ and allows users to choose their own font and font size without causing text to 
 <h3 id="simplicity">Prefer simple solutions</h3>
 <!-- was "Avoid Needless Complexity" in the HTML Design Principles -->
 
+Look hard for simple solutions to the 
+<a href="#priority-of-constituencies">user needs</a>
+you intend to address.
+
 Simple solutions are generally better than complex solutions,
 although they may be harder to find.
 Simpler features are easier for user agents to implement and test,
 more likely to be interoperable,
-and easier for authors to understand. 
+and easier for authors to understand.
+
+Make sure that your <a href="#priority-of-constituencies">user needs</a>
+are well-defined, so that you can avoid scope creep.
 
 See also:
 
@@ -252,17 +259,16 @@ for specific guidance on naming.
 
 <h3 id="feature-detect">New features should be detectable</h3>
 
-Most new features should be able to be programmatically detected,
+If appropriate, provide a way for authors to programmatically detect
+whether your feature is available,
 so that web content may gracefully handle the feature not being present.
 
 An existing feature may not be available on a page for a number of reasons, including
-- because it has not been implmented yet, or
+- because it has not been implemented yet, or
 - because it is only available in <a href="#secure-context">secure contexts</a>, or
 - because the user denied the page permission to use the feature.
 
-The way that the feature's presence is exposed to the page
-should be identical in any case:
-authors should not need to write different code to handle each scenario,
+Authors should need to write different code to handle each scenario,
 and should not be able to deduce which cases applied.
 
 <p class="note">
@@ -273,38 +279,40 @@ and have a separate way to detect that the device is not.
 See [[#device-enumeration]].
 </p>
 
-Feature detection should always be possible from JavaScript,
-but in some cases the feature should also be detectable
+Authors should always be able to detect a feature from JavaScript,
+and in some cases the feature should also be detectable
 in the language where it is used
 (such as ''@supports'' in CSS).
 
-In contrast, some features should **not** be detectable.
+In some cases, it may **not** be appropriate to allow feature detection.
 Whether the feature should be detectable or not
 should be based on the <a href="#priority-of-constituencies">user need</a>
 for the feature:
 if there is a user need or design principle which would fail
 if feature detection were available for the feature,
-then feature detection should not be provided.
+then you should not support feature detection.
 
 See also:
 
 * [[#do-not-expose-use-of-private-browsing-mode]]
 * [[#do-not-expose-use-of-assistive-tech]]
+* [[#secure-context]]
 
 <h3 id="secure-context">Consider limiting new features to secure contexts</h3>
 
-It may save you significant time and effort
-to pre-emptively restrict your feature to Secure Contexts.
-
-If a feature would pose a risk to user privacy or security
+Always limit your feature to secure contexts
+if it would pose a risk to the user
 without the authentication, integrity, or confidentiality
-that is present only in secure contexts,
-then the feature **must** be limited to secure contexts.
+that is present only in secure contexts.
+
+<div class="example">
 One example of a feature that should be limited to secure contexts
 is [Geolocation](https://www.w3.org/TR/geolocation-API/),
 since it would be a risk to users' privacy to transmit their location in an insecure way.
+</div>
 
-For other features, it should be weighed carefully whether user needs are best served
+For other features, carefully weigh up whether 
+<a href="priority-of-constituencies">user needs</a> are best served
 by making the feature available in an insecure context.
 
 <div class="note">
@@ -321,17 +329,18 @@ be defined in normative prose in the specification.
 
 <div class="note">
 As described in [[#feature-detect]],
-there should be a way to programmatically detect whether a feature is available,
+you should provide a way to programmatically detect whether a feature is available,
 including cases where the feature is unavailable because the context is not secure.
 
 However, if, for some reason
 there is no way for code to gracefully handle the feature not being present,
-limiting the feature to secure contexts
-might cause problems
+limiting the feature to secure contexts might cause problems
 for code (such as libraries) that may be used in either secure or non-secure contexts.
 </div>
 
 <h3 id="do-not-expose-use-of-private-browsing-mode">Do not reveal that private browsing mode is engaged</h3>
+
+Make sure that your feature does not give authors a way to detect private browsing mode.
 
 Some people use [private browsing mode](https://www.w3.org/2001/tag/doc/private-browsing-modes/)
 for their own <a href="#safe-to-browse">safety</a>;
@@ -373,22 +382,19 @@ See also:
 
 * [Security and privacy are essential](https://www.w3.org/2001/tag/doc/ethical-web-principles/#privacy)
 * [What data does this specification expose to an origin?](https://www.w3.org/TR/security-privacy-questionnaire/#underlying-platform-data)
-
+* [[#private-browsing-mode]]
 
 <h3 id="private-browsing-mode">Consider how your API should behave in private browsing mode</h3>
 
-There are some situations in which
-APIs should consider behaving differently
-when private browsing mode is engaged,
-as discussed in our [privacy & security questionnaire](https://www.w3.org/TR/security-privacy-questionnaire/#private-browsing).
+If necessary, specify how your API should behave differently
+in private browsing mode.
 
-For instance,
-if your API would reveal information
-that would allow for the correlation
-of a single user’s activity
+For example, if your API would reveal information
+that would allow someone to correlation
+a single user’s activity
 both in and out of private browsing mode,
-consider possible [mitigations](https://www.w3.org/TR/security-privacy-questionnaire/#mitigations) such as
-introducing noise,
+consider possible [mitigations](https://www.w3.org/TR/security-privacy-questionnaire/#mitigations) 
+such as introducing noise,
 or using permission prompts to give the user extra information
 to help them meaningfully consent to this tracking (see [[#consent]]).
 
@@ -402,7 +408,8 @@ This can and should be done
 without revealing any detectable API differences to the site.
 
 <div class="example">
-User Agents which support [localStorage](https://html.spec.whatwg.org/multipage/webstorage.html#dom-localstorage)
+User Agents which support 
+[localStorage](https://html.spec.whatwg.org/multipage/webstorage.html#dom-localstorage)
 should not persist storage area changes
 made while private browsing mode is engaged.
 
@@ -418,24 +425,33 @@ at the other session's [window object](https://html.spec.whatwg.org/multipage/wi
 See also:
 
 * [Does this specification introduce new state for an origin that persists across browsing sessions?](https://www.w3.org/TR/security-privacy-questionnaire/#persistent-origin-specific-state)
+* [Security and privacy self review: Private Browsing](https://www.w3.org/TR/security-privacy-questionnaire/#private-browsing)
 
 <h3 id="do-not-expose-use-of-assistive-tech">Do not reveal that assistive technologies are being used</h3>
 
+Make sure that your API does not provide a way
+for authors to detect that a user is using assistive technology
+without the user's consent.
+
 [The web platform must be accessible to people with disabilities.](https://www.w3.org/2001/tag/doc/ethical-web-principles/#allpeople)
-APIs which reveal the use of assistive technologies to sites
-enable sites to deny access to services
-to those who make use of assistive technologies.
+If a site can detect that a user is using an assistive technology,
+that site can deny or restrict the user's access to the services it provides.
 
 People who make use of assistive technologies
 are often [vulnerable members of society](https://www.w3.org/2001/tag/doc/ethical-web-principles/#noharm);
 their use of assistive technologies is [sensitive information](https://www.w3.org/TR/security-privacy-questionnaire/#sensitive-data) about them.
-It should be <a href="#safe-to-browse">safe for them to browse the web</a>.
-Consider the risks of revealing their use of assistive technologies to others
+If an API provides access to this information
+without the user's [consent](#consent),
+this sensitive information may be revealed to others
 (including [state actors](https://www.w3.org/2001/tag/doc/ethical-web-principles/#expression))
 who may wish them harm.
 
-Given these two concerns,
-websites should not be able to detect that assitive technologies are being used.
+Sometimes people propose features which aim to improve the user experience
+for users of assistive technology,
+but which would reveal the user's use of assistive technology as a side effect.
+While these are well intentioned,
+they violate [[#safe-to-browse]],
+so alternative solutions must be found.
 
 <div class="example">
 
@@ -485,7 +501,7 @@ this is a historical artifact only.
 
 <h3 id="js-rtc">Preserve run-to-completion semantics</h3>
 
-Data accessed from JavaScript APIs must not be modified 
+Do not modify data accessed from JavaScript APIs
 while a JavaScript <a>event loop</a> is running.
 
 A JavaScript Web API is generally a wrapper around 
@@ -514,7 +530,7 @@ the property will not be updated until the next task.
 
 <h3 id="js-gc">Do not expose garbage collection</h3>
 
-JavaScript Web APIs should not behave differently 
+Ensure your JavaScript Web APIs do not behave differently 
 depending on the timing of garbage collection.
 
 The timing of garbage collection is different in different user agents,
@@ -548,8 +564,7 @@ to either reliably reuse the output,
 or to produce a new {{HTMLCollection}} each time it's invoked.
 </div>
 
-{{Document/getElementsByTagName}} is particularly bad,
-because there is no sign given to the author that
+{{Document/getElementsByTagName}} gives no sign given to the author that
 it may depend on the timing of garbage collection.
 In contrast, an API which is explicitly designed to depend on garbage collection,
 such as `WeakRef` or `FinalizationGroup`,
@@ -645,231 +660,266 @@ even if it is not being used.
 If a static object represents some state which may change frequently,
 it should be returned from a method,
 rather than available as an attribute. 
-See [[#attributes-like-data]].
 
-<h3 id="prefer-dict-to-bool">Prefer dictionary parameters over boolean parameters or other unreadable parameters</h3>
+See also:
 
-APIs should generally prefer dictionary parameters
-(with named booleans in the dictionary)
-over boolean parameters.
-This makes the code that calls the API
-<a href="https://ariya.io/2011/08/hall-of-api-shame-boolean-trap">much more readable</a>.
-It also makes the API more extensible in the future,
-particularly if multiple booleans are needed.
+* [[#attributes-like-data]]
 
-<p class="example">For example,
-<code highlight="js">new Event("exampleevent", { bubbles: true, cancelable: false})</code>
-is much more readable than
-<code highlight="js">new Event("exampleevent", true, false)</code>.
+<h3 id="optional-parameters">Make function parameters optional if possible</h3>
 
-Furthermore,
-the booleans in dictionaries need to be designed so that they all default to false.
-If booleans default to true, then
-<a href="https://lists.w3.org/Archives/Public/public-script-coord/2013OctDec/0302.html">users of the API will find unexpected JavaScript behavior</a> since <code highlight="js">{ passive: false }</code> and <code highlight="js">{ passive: undefined }</code> will produce different results.
-But at the same time, it's important to avoid naming booleans in negative ways,
-because then code will have confusing double-negatives.
-These pieces of advice may sometimes conflict,
-but the conflict can be avoided by using opposite words without negatives,
-such as &ldquo;repeat&rdquo; versus &ldquo;once&rdquo;,
-&ldquo;isolate&rdquo; versus &ldquo;connect&rdquo;,
-or &ldquo;private&rdquo; versus &ldquo;public&rdquo;.
+If a parameter for an API function has a reasonable default value,
+make that parameter optional and specify the default value.
 
-Likewise, APIs should use dictionary parameters to avoid other cases
-of difficult to understand sequences of parameters.
-For example,
-<code highlight="js">window.scrollBy({ left: 50, top: 0 })</code>
-is more readable than
-<code highlight="js">window.scrollBy(50, 0)</code>.
+<div class="example">
+{{EventTarget/addEventListener()}} takes an optional boolean `useCapture` argument.
+Thie defaults to `false`, meaning that 
+the event should be dispatched to the listener in the bubbling phase by default.
+</div> 
 
-<h3 id="optional-parameters">Make non-critical function parameters optional</h3>
-
-Parameters that are not strictly necessary should be made optional.
-Making arguments optional with reasonable defaults
-reduces overhead when the function is used,
-and increases user-friendliness.
-
-Optional parameters should be consolidated into a dictionary,
-and empty parameters should be treated identically to when the parameter is omitted.
-
-<p class="example">For example,
-<code highlight="js">element.scrollIntoView(false, {});</code>
-is equivalent to
-<code highlight="js">element.scrollIntoView(false);</code>,
-and
-<code highlight="js">element.addEventListener("click", onClick, undefined);</code>
-is equivalent to
-<code highlight="js">element.addEventListener("click", onClick)</code>.
-</p>
-
-Exceptions have been made for legacy interoperability reasons
-(such as XMLHttpRequest),
+Note: Exceptions have been made for legacy interoperability reasons
+(such as {{XMLHttpRequest}}),
 but this should be considered a design mistake rather than recommended practice.
+
+The API must be designed so that if a parameter is left out,
+the default value used is the same as 
+converting `undefined` to the type of the parameter.
+For example, if a boolean parameter is not set,
+it must default to false.
+
+See also:
+
+* [[prefer-dict-to-bool]]
+
+<h3 id="prefer-dict-to-bool">Prefer dictionary parameters over primitive parameters</h3>
+
+API methods should generally use dictionary parameters
+instead of a series of optional primitive parameters.
+
+This makes the code that calls the method much more readable.
+It also makes the API more extensible in the future,
+particularly if multiple parameters with the same type are needed.
+
+<div class="example">
+For example,
+
+<pre highlight="js">
+new Event("example", 
+          { bubbles: true, 
+            cancelable: false})
+</pre>
+
+is much more readable than
+
+<pre highlight="js">
+new Event("example", true, false)
+</pre>
+
+Also,
+
+<pre highlight="js">
+window.scrollBy({ left: 50, top: 0 })
+</pre>
+
+is more readable than
+
+<pre highlight="js">
+window.scrollBy(50, 0)
+</pre>
+
+</div>
+
+The dictionary itself should be an optional parameter,
+so that if the author is happy with all of the default options,
+they can avoid passing an extra argument.
+
+<div class="example">
+For example, 
+<pre highlight="js">
+element.scrollIntoView(false, {});
+</pre>
+is equivalent to 
+<pre highlight="js">
+element.scrollIntoView(false);
+</pre>
+</div>
+
+See also:
+
+* <a href="https://ariya.io/2011/08/hall-of-api-shame-boolean-trap">Hall of API Shame: Boolean Trap</a>.
+* <a href="https://lists.w3.org/Archives/Public/public-script-coord/2013OctDec/0302.html">APIs that have boolean arguments defaulting to true</a> 
+* [[#optional-parameters]]
+* [[#naming-optional-parameters]]
+
+<h3 id="naming-optional-parameters">Naming optional parameters</h3>
+
+Name optional parameters to make the default behavior obvious
+without being named negatively.
+
+This applies whether they are provided in a [dictionary](#prefer-dict-to-bool) 
+or as [single parameters](#optional-parameters).
+
+<div class="example">
+{{EventTarget.addEventListener()}} takes an `options` object 
+which includes an option named `once`.
+This indicates that the listener should **not** be invoked repeatedly.
+
+This option could have been named `repeat`,
+but that would require the [default](#optional-parameters) to be `true`.
+Instead of naming it `noRepeat`, 
+the API authors named it `once`, 
+to reflect the default behaviour without using a negative.
+
+Other examples:
+* `passive` rather than `active`, or
+* `isolate` rather than `connect`, or
+* `private` rather than `public`
+</div>
+
+See also:
+
+* [[#naming-is-hard]]
 
 <h3 id="constructors">Classes should have constructors when possible</h3>
 
-By default, [[!WEBIDL]] interfaces are reified in JavaScript as "non-constructible" classes: trying
-to create instances of them using the normal pattern in JavaScript, `new X()`, will throw a
-{{TypeError}}. This is a poor experience for JavaScript developers, and doesn't match the design of
-most of the JavaScript standard library or of the classes JavaScript developers themselves create.
+Make sure that any class that is part of your API has a constructor,
+if it is appropriate.
 
-From a naive perspective, it's not even coherent: how can instances of this thing ever exist, if
-they can't be constructed? The answer is that the platform has magic powers: it can create instances
-of Web IDL-derived classes without ever actually calling their constructor.
+By default, [[!WEBIDL]] interfaces "non-constructible" classes: 
+trying to create instances of them using `new X()` will throw a {{TypeError}}. 
+To make them constructible, 
+you can add appropriate [=constructor operation=] to your interface,
+and defining the algorithm for creating new instances of your class.
 
-You should strive to reduce such magic in designing your own APIs, and give them constructors which
-allow JavaScript developers to create them, just like the platform does. This means adding an
-appropriate [=constructor operation=] to your interface, and defining the algorithm for
-creating new instances of your class.
+This allows JavaScript developers 
+to create instances of the class 
+for purposes such as testing, mocking,
+or interfacing with third-party libraries which accept instances of that class. 
+It also gives authors the ability to create a subclass of the class,
+which is otherwise prevented,
+because of the way JavaScript handles subclasses.
 
-Apart from reducing the magic in the platform, adding constructors allows JavaScript developers to
-create instances of the class for their own purposes, such as testing, mocking, or interfacing with
-third-party libraries which accept instances of that class. Additionally, because of how
-JavaScript's class design works, it is only possible to create a subclass of the class if it is
-constructible.
+This will not be appropriate in all cases. 
+For example: 
+* Some objects represent access to privileged resources,
+  so they need to be constructed by factory methods
+  which can access those resources.
+* Some objects have very carefully controlled lifecycles,
+  so they need to be created and accessed through specific methods.
+* Some objects represent an abstract base class, 
+  which shouldn't be constructed,
+  and which authors should not be able to define subclasses for.
 
-Sometimes this isn't the right answer: for example, some objects essentially wrap handles to
-privileged resources, and it isn't reasonable to create some representation of that privileged
-resource in JavaScript so that you can pass it to the constructor. Or the object's lifecycle needs
-to be very carefully controlled, so that creating new ones is only possible through privileged
-operations. Or the interface represents an abstract base class for which it doesn't make sense to
-construct an instance, or create an author-defined subclass. But cases like these should be the
-exception, not the norm.
+<p class="example">
+The {{Event}} class, and all its derived interfaces, are constructible. 
+This is useful when testing code which handles events:
+an author can construct an {{Event}} to pass to a method
+which handles that type of event.
+</p>
 
-<p class="example">The {{Event}} class, and all its derived interfaces, are constructible. This
-allows JavaScript developers to synthesize instances of them, which can be useful in testing or
-shimming scenarios. For example, a library designed for {{MouseEvent}} instances can still be used
-by another library that accepts as input {{TouchEvent}} instances, by writing a small bit of adapter
-code that creates synthetic {{MouseEvent}}s.</p>
+<p class="example">
+The {{Window}} class is not constructible, 
+because creating a new window is a privileged operation 
+with significant side effects. 
+Instead, the {{Window/open|window.open()}} method 
+is used to create new windows.
+</p>
 
-<p class="example">The {{DOMTokenList}} class is, very unfortunately, <a
-href="https://www.w3.org/Bugs/Public/show_bug.cgi?id=27114">not constructible</a>. This prevents the
-creation of <a>custom elements</a> that expose their token list attributes as {{DOMTokenList}}s.</p>
+<p class="example">
+The {{ImageBitmap}} class is not constructible, 
+as it represents an immutable, ready-to-paint bitmap image, 
+and the process of getting it ready to paint must be done asynchronously.
+Instead, the {{createImageBitmap()}} factory method is used to create it.
+</p>
 
-<p class="example">No HTML elements are constructible. This is largely due to some unfortunate
-design decisions that <a href="https://github.com/whatwg/html/issues/896">would take some effort to
-work around</a>. In the meantime, for the purposes of the <a>customized built-in elements</a>
-feature, they have been made subclassable through a specifically-designed one-off solution: the
-[{{HTMLConstructor}}] extended attribute.</p>
 
-<p class="example">The {{Window}} class is not constructible, because creating a new window is a
-privileged operation with significant side effects. Instead, the {{Window/open|window.open()}}
-method is used to create new windows.</p>
+<p class="example">
+The {{DOMTokenList}} class is, sadly, 
+<a href="https://www.w3.org/Bugs/Public/show_bug.cgi?id=27114">not constructible</a>. 
+This prevents the creation of <a>custom elements</a> 
+that expose their token list attributes as {{DOMTokenList}}s.
+</p>
 
-<p class="example">The {{ImageBitmap}} class is not constructible, as it represents an immutable,
-ready-to-paint bitmap image, and the process of getting it ready to paint must be done
-asynchronously. Instead, the {{createImageBitmap()}} method is used to create it.</p>
+<div class="example">
+Several non-constructible classes, 
+like {{Navigator}}, {{History}}, or {{Crypto}}, 
+are non-constructible because they are singletons 
+representing access to per-window information. 
+In these cases, something like the Web IDL <a>namespace</a> feature 
+might have been a better fit,
+but were designed before namespaces, 
+and go beyond what is currently possible with namespaces. 
 
-<p class="example">Several non-constructible classes, like {{Navigator}}, {{History}}, or
-{{Crypto}}, are non-constructible because they are singletons representing access to per-window
-information. In these cases, the Web IDL <a>namespace</a> feature or some evolution of it might have
-been a better fit, but they were designed before namespaces existed, and somewhat exceed the current
-capabilities of namespaces. If you're designing a new singleton, strongly consider using a
-<a>namespace</a> instead of a non-constructible class; if namespaces don't yet have enough
-capabilities, <a href="https://github.com/heycam/webidl/issues/new">file an issue on Web IDL</a> to
-discuss.</p>
-
-<div class="note">
-    <p>For any JavaScript developers still incredulous that it is possible to create an instance of
-    a non-constructible class, we provide the following code example:</p>
-
-    <pre highlight="js">
-        const secret = {};
-
-        class NonConstructible {
-            constructor(theSecret = undefined) {
-                if (theSecret !== secret) {
-                    throw new TypeError("Illegal constructor.");
-                }
-
-                // Set up the object.
-            }
-        }
-    </pre>
-
-    <p>If the author of this code never exposes the `secret` variable to the outside world, they can
-    reserve the ability to create instances of `NonConstructible` for themself: they can always do
-    <code highlight="js">const instance = new NonConstructible(secret)</code>. But the outside world
-    can never successfully "guess" the secret, and thus will always receive a {{TypeError}} when
-    trying to construct an instance of `NonConstructible`.</p>
-
-    <p>From this perspective, what browsers are doing when they create non-constructible classes
-    isn't magic: it's just very tricky. The above section is aimed at urging browsers to avoid such
-    tricks (or their equivalents in C++/Rust/etc.) whenever reasonable.</p>
+If your API requires this type of singleton,
+consider using a <a>namespace</a>,
+and <a href="https://github.com/heycam/webidl/issues/new">File an issue on Web IDL</a>
+if there is some problem with using them.
 </div>
 
 
 <h3 id="promises">Design asynchronous APIs using Promises</h3>
 
-Asynchronous APIs should generally be designed using promises
-rather than callback functions.
-This is the pattern that we've settled on for the Web platform,
-and having APIs consistently use promises means that the APIs are
-easier to use together (such as by chaining promises).
-This pattern also tends to produce cleaner code than the use
-of APIs with callback functions.
+If an API function needs to be asynchronous, use Promises,
+not callback functions.
 
-Furthermore, you should carefully consider whether an API might need
-to be asynchronous before making it a synchronous API.
+Using Promises consistently across the Web platform
+means that APIs are easier to use together,
+such as by chaining promises.
+Promise-using code also tends to be easier to understand
+than code using callback functions.
+
 An API might need to be asynchronous if:
-  * some implementations may (in at least some cases) wish to prompt the user
-    or ask the user for permission before allowing use of the API,
-  * implementations may need to consider information that might be stored
-    on disk in order to compute the result,
-  * implementations may need to interact with the network before returning
-    the result, or
-  * implementations may wish to do work on another thread or in another
-    process before returning the result.
+  * the user agent needs to prompt the user for [permission](#consent),
+  * some information might need to be read from disk,
+    or requested from the network,
+  * the user agent may need to do a significant amount of work on another thread,
+    or in another process, before returning the result.
 
-For more information on how to design APIs using promises,
-and on when to use promises and when not to use promises,
-see <strong><a href="https://www.w3.org/2001/tag/doc/promises-guide">Writing
-Promise-Using Specifications</a></strong>.
+See also:
+
+* <a href="https://www.w3.org/2001/tag/doc/promises-guide">Writing Promise-Using Specifications</a>
 
 <h3 id="aborting">Cancel asynchronous APIs/operations using AbortSignal</h3>
 
-Async functions that need cancellation should take an `AbortSignal` as part
-of an options dictionary.
+If an asynchronous function can be cancelled,
+allow authors to pass in an {{AbortSignal}} as part of an options dictionary.
 
-Example:
-
+<div class="example">
 ```js
 const controller = new AbortController();
 const signal = controller.signal;
 geolocation.read({ signal });
 ```
+</div>
 
-Reusing the same primitive everywhere has multiplicative effects throughout
-the platform. In particular, there's a common pattern of using a single
-`AbortSignal` for a bunch of ongoing operations, and then aborting them
-(with the corresponding `AbortController`) when e.g. the user presses cancel,
-or a single-page-app navigation occurs, or similar. So the minor extra
-complexity for an individual API leads to a large reduction in complexity
-when used with multiple APIs together.
+Consistently using `AbortSignal` as a mechanism 
+for cancelling an asychronous operation
+means that authors can write less complex code.
 
-There might be cases where cancellation cannot be guaranteed. In these cases,
-the `AbortController` can still be used because a call to `abort()` on
-`AbortController` is a request to abort. How you react to it depends on your spec.
-Note, requestAbort() was considered in the AbortController design instead
-of abort(), but the latter was chosen for brevity.
+For example, there's a pattern of using a single `AbortSignal` 
+for several ongoing operations, 
+and then using the corresponding `AbortController` 
+to cancel all of the operations at once if necessary
+(such as if the user presses "cancel", 
+or a single-page app navigation occurs.)
 
-<h3 id="string-constants">Constants, enums, and bitmasks</h3>
+Even if cancellation can't be guaranteed. 
+{{AbortController}} can still be used, 
+because a call to {{AbortController/abort()}} on `AbortController`
+is a request, rather than a guarantee.
 
-In many other platforms and programming languages, constants and enums are
-commonly expressed using a integer constant, sometimes in conjunction with
-a bitmask mechanism.
+<h3 id="string-constants">Use strings for constants and enums</h3>
 
-However on the Web platform, it is more common to use a string constant for
-the cases where a constant is needed. This is much more inspection friendly
-for both development and expressing the constant codes through a user facing
-interface, and in JavaScript engines, using integers offers no significant
-performance benefit over strings.
+If your API needs a constant, or a set of enumerated values,
+use string values.
 
-Strings do not directly address the use case for bitmasks. For these cases,
-you should use an object dictionary which contains the state that the
-bitmask is attempting to express, as object dictionaries can then be passed
-around from method to method as needed as easily as the state in a single
-bitmask value.
+Strings are easier for developers to inspect,
+and in JavaScript engines there is no performance benefit 
+from using integers instead of strings.
 
+If you need to express a state which is a combination of properties,
+which might be expressed as a bitmask in another language,
+use a dictionary object instead.
+This object can be passed around as easily as a single bitmask value.
 
 <h2 id="css">Cascading Style Sheets (CSS)</h2>
 
@@ -879,9 +929,9 @@ See also [[#css-naming]].
 
 <h3 id="css-property-separation">Separate CSS properties based on what should cascade separately</h3>
 
-Deciding which values should be grouped together as CSS properties
+Decide which values should be grouped together as CSS properties
 and which should be separate properties
-should be based on what makes sense to set independently.
+based on what makes sense to set independently.
 
 [CSS cascading](https://www.w3.org/TR/2011/REC-CSS2-20110607/cascade.html#cascade)
 allows [declarations](https://www.w3.org/TR/2011/REC-CSS2-20110607/syndata.html#declaration)
@@ -905,8 +955,8 @@ and a function of the script (e.g., Latin, Cyrillic, Arabic) used in the documen
 
 <h3 id="css-inherited-or-not">Make appropriate choices for whether CSS properties are inherited</h3>
 
-Deciding whether a property should be [inherited](https://www.w3.org/TR/2011/REC-CSS2-20110607/cascade.html#inheritance) should depend on whether
-the effect of the property should be overridden or added to
+Decide whether a property should be [inherited](https://www.w3.org/TR/2011/REC-CSS2-20110607/cascade.html#inheritance) 
+based on whether the effect of the property should be overridden or added to
 if set on an ancestor as well as a descendant.
 
 If setting the property on a descendant element needs to override (rather than add to)
@@ -992,8 +1042,8 @@ of walking up the ancestor chain looking for text decorations on ancestors.
 
 <h3 id="css-computed-value">Choose the computed value type based on how the property should inherit</h3>
 
-The <a>computed value</a> of a CSS property
-should be chosen based on how it will [=inherit=],
+Choose the <a>computed value</a> of a CSS property
+based on how it will [=inherit=],
 and the other properties which may depend on it,
 whether or not it has been inherited.
 
