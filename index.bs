@@ -178,7 +178,7 @@ that is a signal that you may need to reconsider the design of the feature.
 
 If a permission prompt is shown,
 and the user does not grant permission,
-the Web page should not be able to do anything 
+the Web page should not be able to do anything
 that the user believes they have refused consent for.
 
 By asking for consent,
@@ -246,7 +246,7 @@ and allows users to choose their own font and font size without causing text to 
 <h3 id="simplicity">Prefer simple solutions</h3>
 <!-- was "Avoid Needless Complexity" in the HTML Design Principles -->
 
-Look hard for simple solutions to the 
+Look hard for simple solutions to the
 <a href="#priority-of-constituencies">user needs</a>
 you intend to address.
 
@@ -325,7 +325,7 @@ is [Geolocation](https://www.w3.org/TR/geolocation-API/),
 since it would be a risk to users' privacy to transmit their location in an insecure way.
 </div>
 
-For other features, carefully weigh up whether 
+For other features, carefully weigh up whether
 <a href="priority-of-constituencies">user needs</a> are best served
 by making the feature available in an insecure context.
 
@@ -407,7 +407,7 @@ For example, if your API would reveal information
 that would allow someone to correlation
 a single user’s activity
 both in and out of private browsing mode,
-consider possible [mitigations](https://www.w3.org/TR/security-privacy-questionnaire/#mitigations) 
+consider possible [mitigations](https://www.w3.org/TR/security-privacy-questionnaire/#mitigations)
 such as introducing noise,
 or using permission prompts to give the user extra information
 to help them meaningfully consent to this tracking (see [[#consent]]).
@@ -422,7 +422,7 @@ This can and should be done
 without revealing any detectable API differences to the site.
 
 <div class="example">
-User Agents which support 
+User Agents which support
 [localStorage](https://html.spec.whatwg.org/multipage/webstorage.html#dom-localstorage)
 should not persist storage area changes
 made while private browsing mode is engaged.
@@ -485,455 +485,6 @@ See also:
 * [Security and privacy are essential](https://www.w3.org/2001/tag/doc/ethical-web-principles/#privacy)
 * [What data does this specification expose to an origin?](https://www.w3.org/TR/security-privacy-questionnaire/#underlying-platform-data)
 
-<h2 id="js">JavaScript Language</h2>
-
-<h3 id="js-only">Web APIs are for JavaScript</h3>
-
-When designing imperative APIs for the Web,
-use JavaScript.
-In particular,
-you can freely rely upon language-specific semantics and conventions, 
-with no need to keep things generalized.
-
-<div class="example">
-For example,
-the {{CustomElementRegistry.define()}} method takes a reference to
-a <a href="https://tc39.es/ecma262/#sec-static-semantics-constructormethod">Constructor Method</a>.
-
-This takes advantage of the relatively recent addition of Classes to JavaScript,
-and fact that function pointers are very easy to use in JavaScript.
-</div>
-
-<div class="note">
-JavaScript is also known as [[!ECMASCRIPT]]
-</div>
-
-<div class="note">
-[[WEBIDL]] defines a separate "ECMAScript binding" section;
-this is a historical artifact only.
-</div>
-
-<h3 id="js-rtc">Preserve run-to-completion semantics</h3>
-
-Do not modify data accessed from JavaScript APIs
-while a JavaScript <a>event loop</a> is running.
-
-A JavaScript Web API is generally a wrapper around 
-a feature implemented in a lower-level language,
-such as C++ or Rust.
-Unlike those languages,
-JavaScript guarantees that once a piece of code begins executing,
-it will continue executing until it has completed.
-
-Because of that, JavaScript authors take for granted 
-that the data available to a function won’t change 
-(unless that function changes that data itself).
-
-So if a JavaScript Web API exposes some piece of data,
-such as an object property,
-the user agent must not update that data 
-while a JavaScript task is running.
-Instead, if the underlying data changes,
-<a>queue a task</a> to modify the exposed version of the data.
-
-<div class="example">
-If a JavaScript task is has accessed the {{navigator.onLine}} property,
-and browser's online status changes,
-the property will not be updated until the next task.
-</div>
-
-<h3 id="js-gc">Do not expose garbage collection</h3>
-
-Ensure your JavaScript Web APIs do not behave differently 
-depending on the timing of garbage collection.
-
-The timing of garbage collection is different in different user agents,
-and may change over time as user agents work on improving performance.
-If an API exposes the timing of garbage collection,
-it creates the potential for programs to behave differently
-in different contexts,
-meaning that authors need to write code to handle these differences.
-It may also make it more difficult for user agents
-to implement different garbage collection strategies,
-if there is enough code which depends on timing working a particular way.
-
-This means that you shouldn't expose any API that acts as a weak reference, 
-e.g. with a property that becomes <code highlight="js">null</code> 
-once garbage collection runs.
-Object and data lifetimes in JavaScript code should be predictable.
-
-<div class="example">
-{{Document/getElementsByTagName}} returns an {{HTMLCollection}} object,
-which may be re-used if the method is called twice on the same Document object,
-with the same tag name.
-In practice,
-this means that the same object will be returned 
-if and only if it has not been garbage collected.
-This means that the behaviour is different depending on 
-the timing of garbage collection.
-
-If {{Document/getElementsByTagName}} were designed today, 
-the advice to the designers would be 
-to either reliably reuse the output, 
-or to produce a new {{HTMLCollection}} each time it's invoked.
-</div>
-
-{{Document/getElementsByTagName}} gives no sign given to the author that
-it may depend on the timing of garbage collection.
-In contrast, an API which is explicitly designed to depend on garbage collection,
-such as `WeakRef` or `FinalizationGroup`,
-sets accurate author expectations about 
-the interaction with garbage collection.
-
-<h2 id="api-surface">JavaScript API Surface Concerns</h2>
-
-<h3 id="attributes-like-data">Attributes should behave like data properties</h3>
-
-[[!WEBIDL]] attributes should act like simple JavaScript object properties,
-even though in reality they are implemented as accessor properties
-with separate getter and setter functions.
-
-* Getters must not have any observable side effects.
-* Getters should not perform any complex operations. 
-* Ensure that <code highlight="js">obj.attribute === obj.attribute</code> is always true:
-    do not create a new value each time the getter is called. 
-* If possible, ensure that given <code highlight="js">obj.attribute = x</code>,
-    <code highlight="js">obj.attribute === x</code> is true.
-    (This may not be possible if some kind of conversion is necessary for `x`.)
-
-If you were thinking about using an attribute,
-but it doesn't behave this way,
-you should probably use a method instead.
-
-<div class="example">
-For example, <code highlight="js">offsetTop</code> performs layout, 
-which can be complex and time-consuming.
-It would have been better if this had been a method like {{Element.getBoundingClientRect()}}.
-</div>
-
-<h3 id="live-vs-static">Consider whether objects should be live or static</h3>
-
-If an API gives access to an object
-representing some internal state,
-decide whether that object should continue to be updated as the state changes.
-
-An object which represents the current state at all times
-is a <dfn export>live object</dfn>,
-while an object which represents the state at the time it was created
-is a <dfn export>static object</dfn>.
-
-<h4 id="live-objects" class="no-num no-toc">Live objects</h4>
-
-If an object allows the author to change the internal state,
-that object should be live. 
-For example, DOM {{Node}}s are live objects,
-to allow the author to make changes to the document
-with an understanding of the current state.
-
-Properties of live objects may be computed as they are accessed,
-instead of when the object is created.
-This makes live objects sometimes a better choice
-if the data needed is complex to compute,
-since there is no need to compute all the data before the object is returned.
-
-A live object may also use less memory,
-since there is no need to copy data to a static version.
-
-<h4 id="static-objects" class="no-num no-toc">Static objects</h4>
-
-If an object represents a list that might change,
-most often the object should be static.
-This is so that code iterating over the list 
-does not need to handle the possibility of the list changing in the middle.
-
-<div class="example">
-{{Document/getElementsByTagName()}} returns a live object which represents a list,
-meaning that authors need to take care when iterating over its items.
-
-<!-- does anyone know more specifics here? -->
-The choice to have {{ParentNode/querySelectorAll()}} return static objects
-was made after spec authors noticed that {{getElementsByTagName()}} 
-was causing problems.
-
-{{URLSearchParams}} is not static,
-even though it represents a list,
-because it is the way for authors to change the query string of a URL.
-</div>
-
-Note:  For <a>maplike</a> and <a>setlike</a> types,
-this advice may not apply,
-since these types were designed to behave well
-when they change while being iterated.
-
-If it would be complex to keep the data needed by an object up to date,
-a static object avoids having to keep the object updated 
-until it is garbage collected,
-even if it is not being used.
-<!-- why wouldn't it be computed lazily though? -->
-
-If a static object represents some state which may change frequently,
-it should be returned from a method,
-rather than available as an attribute. 
-
-See also:
-
-* [[#attributes-like-data]]
-
-<h3 id="optional-parameters">Make function parameters optional if possible</h3>
-
-If a parameter for an API function has a reasonable default value,
-make that parameter optional and specify the default value.
-
-<div class="example">
-{{EventTarget/addEventListener()}} takes an optional boolean `useCapture` argument.
-Thie defaults to `false`, meaning that 
-the event should be dispatched to the listener in the bubbling phase by default.
-</div> 
-
-Note: Exceptions have been made for legacy interoperability reasons
-(such as {{XMLHttpRequest}}),
-but this should be considered a design mistake rather than recommended practice.
-
-The API must be designed so that if a parameter is left out,
-the default value used is the same as 
-converting `undefined` to the type of the parameter.
-For example, if a boolean parameter is not set,
-it must default to false.
-
-See also:
-
-* [[prefer-dict-to-bool]]
-
-<h3 id="prefer-dict-to-bool">Prefer dictionary parameters over primitive parameters</h3>
-
-API methods should generally use dictionary parameters
-instead of a series of optional primitive parameters.
-
-This makes the code that calls the method much more readable.
-It also makes the API more extensible in the future,
-particularly if multiple parameters with the same type are needed.
-
-<div class="example">
-For example,
-
-<pre highlight="js">
-new Event("example", 
-          { bubbles: true, 
-            cancelable: false})
-</pre>
-
-is much more readable than
-
-<pre highlight="js">
-new Event("example", true, false)
-</pre>
-
-Also,
-
-<pre highlight="js">
-window.scrollBy({ left: 50, top: 0 })
-</pre>
-
-is more readable than
-
-<pre highlight="js">
-window.scrollBy(50, 0)
-</pre>
-
-</div>
-
-The dictionary itself should be an optional parameter,
-so that if the author is happy with all of the default options,
-they can avoid passing an extra argument.
-
-<div class="example">
-For example, 
-<pre highlight="js">
-element.scrollIntoView(false, {});
-</pre>
-is equivalent to 
-<pre highlight="js">
-element.scrollIntoView(false);
-</pre>
-</div>
-
-See also:
-
-* <a href="https://ariya.io/2011/08/hall-of-api-shame-boolean-trap">Hall of API Shame: Boolean Trap</a>.
-* <a href="https://lists.w3.org/Archives/Public/public-script-coord/2013OctDec/0302.html">APIs that have boolean arguments defaulting to true</a> 
-* [[#optional-parameters]]
-* [[#naming-optional-parameters]]
-
-<h3 id="naming-optional-parameters">Naming optional parameters</h3>
-
-Name optional parameters to make the default behavior obvious
-without being named negatively.
-
-This applies whether they are provided in a [dictionary](#prefer-dict-to-bool) 
-or as [single parameters](#optional-parameters).
-
-<div class="example">
-{{EventTarget.addEventListener()}} takes an `options` object 
-which includes an option named `once`.
-This indicates that the listener should **not** be invoked repeatedly.
-
-This option could have been named `repeat`,
-but that would require the [default](#optional-parameters) to be `true`.
-Instead of naming it `noRepeat`, 
-the API authors named it `once`, 
-to reflect the default behaviour without using a negative.
-
-Other examples:
-* `passive` rather than `active`, or
-* `isolate` rather than `connect`, or
-* `private` rather than `public`
-</div>
-
-See also:
-
-* [[#naming-is-hard]]
-
-<h3 id="constructors">Classes should have constructors when possible</h3>
-
-Make sure that any class that is part of your API has a constructor,
-if it is appropriate.
-
-By default, [[!WEBIDL]] interfaces "non-constructible" classes: 
-trying to create instances of them using `new X()` will throw a {{TypeError}}. 
-To make them constructible, 
-you can add appropriate [=constructor operation=] to your interface,
-and defining the algorithm for creating new instances of your class.
-
-This allows JavaScript developers 
-to create instances of the class 
-for purposes such as testing, mocking,
-or interfacing with third-party libraries which accept instances of that class. 
-It also gives authors the ability to create a subclass of the class,
-which is otherwise prevented,
-because of the way JavaScript handles subclasses.
-
-This will not be appropriate in all cases. 
-For example: 
-* Some objects represent access to privileged resources,
-  so they need to be constructed by factory methods
-  which can access those resources.
-* Some objects have very carefully controlled lifecycles,
-  so they need to be created and accessed through specific methods.
-* Some objects represent an abstract base class, 
-  which shouldn't be constructed,
-  and which authors should not be able to define subclasses for.
-
-<p class="example">
-The {{Event}} class, and all its derived interfaces, are constructible. 
-This is useful when testing code which handles events:
-an author can construct an {{Event}} to pass to a method
-which handles that type of event.
-</p>
-
-<p class="example">
-The {{Window}} class is not constructible, 
-because creating a new window is a privileged operation 
-with significant side effects. 
-Instead, the {{Window/open|window.open()}} method 
-is used to create new windows.
-</p>
-
-<p class="example">
-The {{ImageBitmap}} class is not constructible, 
-as it represents an immutable, ready-to-paint bitmap image, 
-and the process of getting it ready to paint must be done asynchronously.
-Instead, the {{createImageBitmap()}} factory method is used to create it.
-</p>
-
-
-<p class="example">
-The {{DOMTokenList}} class is, sadly, 
-<a href="https://www.w3.org/Bugs/Public/show_bug.cgi?id=27114">not constructible</a>. 
-This prevents the creation of <a>custom elements</a> 
-that expose their token list attributes as {{DOMTokenList}}s.
-</p>
-
-<div class="example">
-Several non-constructible classes, 
-like {{Navigator}}, {{History}}, or {{Crypto}}, 
-are non-constructible because they are singletons 
-representing access to per-window information. 
-In these cases, something like the Web IDL <a>namespace</a> feature 
-might have been a better fit,
-but were designed before namespaces, 
-and go beyond what is currently possible with namespaces. 
-
-If your API requires this type of singleton,
-consider using a <a>namespace</a>,
-and <a href="https://github.com/heycam/webidl/issues/new">File an issue on Web IDL</a>
-if there is some problem with using them.
-</div>
-
-
-<h3 id="promises">Design asynchronous APIs using Promises</h3>
-
-If an API function needs to be asynchronous, use Promises,
-not callback functions.
-
-Using Promises consistently across the Web platform
-means that APIs are easier to use together,
-such as by chaining promises.
-Promise-using code also tends to be easier to understand
-than code using callback functions.
-
-An API might need to be asynchronous if:
-  * the user agent needs to prompt the user for [permission](#consent),
-  * some information might need to be read from disk,
-    or requested from the network,
-  * the user agent may need to do a significant amount of work on another thread,
-    or in another process, before returning the result.
-
-See also:
-
-* <a href="https://www.w3.org/2001/tag/doc/promises-guide">Writing Promise-Using Specifications</a>
-
-<h3 id="aborting">Cancel asynchronous APIs/operations using AbortSignal</h3>
-
-If an asynchronous function can be cancelled,
-allow authors to pass in an {{AbortSignal}} as part of an options dictionary.
-
-<div class="example">
-```js
-const controller = new AbortController();
-const signal = controller.signal;
-geolocation.read({ signal });
-```
-</div>
-
-Consistently using `AbortSignal` as a mechanism 
-for cancelling an asychronous operation
-means that authors can write less complex code.
-
-For example, there's a pattern of using a single `AbortSignal` 
-for several ongoing operations, 
-and then using the corresponding `AbortController` 
-to cancel all of the operations at once if necessary
-(such as if the user presses "cancel", 
-or a single-page app navigation occurs.)
-
-Even if cancellation can't be guaranteed. 
-{{AbortController}} can still be used, 
-because a call to {{AbortController/abort()}} on `AbortController`
-is a request, rather than a guarantee.
-
-<h3 id="string-constants">Use strings for constants and enums</h3>
-
-If your API needs a constant, or a set of enumerated values,
-use string values.
-
-Strings are easier for developers to inspect,
-and in JavaScript engines there is no performance benefit 
-from using integers instead of strings.
-
-If you need to express a state which is a combination of properties,
-which might be expressed as a bitmask in another language,
-use a dictionary object instead.
-This object can be passed around as easily as a single bitmask value.
 
 <h2 id="css">Cascading Style Sheets (CSS)</h2>
 
@@ -969,7 +520,7 @@ and a function of the script (e.g., Latin, Cyrillic, Arabic) used in the documen
 
 <h3 id="css-inherited-or-not">Make appropriate choices for whether CSS properties are inherited</h3>
 
-Decide whether a property should be [inherited](https://www.w3.org/TR/2011/REC-CSS2-20110607/cascade.html#inheritance) 
+Decide whether a property should be [inherited](https://www.w3.org/TR/2011/REC-CSS2-20110607/cascade.html#inheritance)
 based on whether the effect of the property should be overridden or added to
 if set on an ancestor as well as a descendant.
 
@@ -1066,11 +617,11 @@ Note: the <a>computed value</a> should not be confused with the [=resolved value
 which is returned from the {{getComputedStyle()}} method.
 </div>
 
-Certain CSS properties are calculated with 
+Certain CSS properties are calculated with
 <a href="https://wiki.csswg.org/spec/property-dependencies">dependencies</a>
 on others:
 for example, the <a>computed value</a>
-of a property specified in 'lh' units 
+of a property specified in 'lh' units
 depends on the 'line-height' property which applies to the element being considered.
 The <a>computed value</a> for a property should be chosen
 so that the dependent values make sense,
@@ -1080,17 +631,17 @@ regardless of whether they are inherited.
 For example, the 'line-height' property may accept a <<number>> value,
 such as ''line-height: 1.4''.
 This value represents a multiple of the 'font-size',
-so if the 'font-size' is ''20px'', 
+so if the 'font-size' is ''20px'',
 the [=actual value=] for the line height is ''28px''.
 
-However, the <a>computed value</a> in this case is the <<number>> ''1.4'', 
+However, the <a>computed value</a> in this case is the <<number>> ''1.4'',
 not the <<length>> ''28px''.
 
-The 'line-height' property can be inherited 
+The 'line-height' property can be inherited
 into elements that have a different 'font-size',
 and any property on those elements which depends on 'line-height'
 must take the relevant 'font-size' into account,
-rather than the 'font-size' for the element from which 
+rather than the 'font-size' for the element from which
 the 'line-height' value was inherited.
 
   <pre highlight=html>
@@ -1110,7 +661,7 @@ These number values are generally the preferred values to use for 'line-height'
 because they inherit better than length values.
 </div>
 
-<!-- This paragraph is hard to understand, but I don't know how to improve it 
+<!-- This paragraph is hard to understand, but I don't know how to improve it
 Making decisions about whether dependencies should affect computed values
 often involves tradeoffs of complexity.
 Sometimes it is less complex
@@ -1125,6 +676,456 @@ See also:
 
 * [Computed Values Patterns](https://wiki.csswg.org/spec/computed-values)
 
+<h2 id="js">JavaScript Language</h2>
+
+<h3 id="js-only">Web APIs are for JavaScript</h3>
+
+When designing imperative APIs for the Web,
+use JavaScript.
+In particular,
+you can freely rely upon language-specific semantics and conventions,
+with no need to keep things generalized.
+
+<div class="example">
+For example,
+the {{CustomElementRegistry.define()}} method takes a reference to
+a <a href="https://tc39.es/ecma262/#sec-static-semantics-constructormethod">Constructor Method</a>.
+
+This takes advantage of the relatively recent addition of Classes to JavaScript,
+and fact that function pointers are very easy to use in JavaScript.
+</div>
+
+<div class="note">
+JavaScript is also known as [[!ECMASCRIPT]]
+</div>
+
+<div class="note">
+[[WEBIDL]] defines a separate "ECMAScript binding" section;
+this is a historical artifact only.
+</div>
+
+<h3 id="js-rtc">Preserve run-to-completion semantics</h3>
+
+Do not modify data accessed from JavaScript APIs
+while a JavaScript <a>event loop</a> is running.
+
+A JavaScript Web API is generally a wrapper around
+a feature implemented in a lower-level language,
+such as C++ or Rust.
+Unlike those languages,
+JavaScript guarantees that once a piece of code begins executing,
+it will continue executing until it has completed.
+
+Because of that, JavaScript authors take for granted
+that the data available to a function won’t change
+(unless that function changes that data itself).
+
+So if a JavaScript Web API exposes some piece of data,
+such as an object property,
+the user agent must not update that data
+while a JavaScript task is running.
+Instead, if the underlying data changes,
+<a>queue a task</a> to modify the exposed version of the data.
+
+<div class="example">
+If a JavaScript task is has accessed the {{navigator.onLine}} property,
+and browser's online status changes,
+the property will not be updated until the next task.
+</div>
+
+<h3 id="js-gc">Do not expose garbage collection</h3>
+
+Ensure your JavaScript Web APIs do not behave differently
+depending on the timing of garbage collection.
+
+The timing of garbage collection is different in different user agents,
+and may change over time as user agents work on improving performance.
+If an API exposes the timing of garbage collection,
+it creates the potential for programs to behave differently
+in different contexts,
+meaning that authors need to write code to handle these differences.
+It may also make it more difficult for user agents
+to implement different garbage collection strategies,
+if there is enough code which depends on timing working a particular way.
+
+This means that you shouldn't expose any API that acts as a weak reference,
+e.g. with a property that becomes <code highlight="js">null</code>
+once garbage collection runs.
+Object and data lifetimes in JavaScript code should be predictable.
+
+<div class="example">
+{{Document/getElementsByTagName}} returns an {{HTMLCollection}} object,
+which may be re-used if the method is called twice on the same Document object,
+with the same tag name.
+In practice,
+this means that the same object will be returned
+if and only if it has not been garbage collected.
+This means that the behaviour is different depending on
+the timing of garbage collection.
+
+If {{Document/getElementsByTagName}} were designed today,
+the advice to the designers would be
+to either reliably reuse the output,
+or to produce a new {{HTMLCollection}} each time it's invoked.
+</div>
+
+{{Document/getElementsByTagName}} gives no sign given to the author that
+it may depend on the timing of garbage collection.
+In contrast, an API which is explicitly designed to depend on garbage collection,
+such as `WeakRef` or `FinalizationGroup`,
+sets accurate author expectations about
+the interaction with garbage collection.
+
+<h2 id="api-surface">JavaScript API Surface Concerns</h2>
+
+<h3 id="attributes-like-data">Attributes should behave like data properties</h3>
+
+[[!WEBIDL]] attributes should act like simple JavaScript object properties,
+even though in reality they are implemented as accessor properties
+with separate getter and setter functions.
+
+* Getters must not have any observable side effects.
+* Getters should not perform any complex operations.
+* Ensure that <code highlight="js">obj.attribute === obj.attribute</code> is always true:
+    do not create a new value each time the getter is called.
+* If possible, ensure that given <code highlight="js">obj.attribute = x</code>,
+    <code highlight="js">obj.attribute === x</code> is true.
+    (This may not be possible if some kind of conversion is necessary for `x`.)
+
+If you were thinking about using an attribute,
+but it doesn't behave this way,
+you should probably use a method instead.
+
+<div class="example">
+For example, <code highlight="js">offsetTop</code> performs layout,
+which can be complex and time-consuming.
+It would have been better if this had been a method like {{Element.getBoundingClientRect()}}.
+</div>
+
+<h3 id="live-vs-static">Consider whether objects should be live or static</h3>
+
+If an API gives access to an object
+representing some internal state,
+decide whether that object should continue to be updated as the state changes.
+
+An object which represents the current state at all times
+is a <dfn export>live object</dfn>,
+while an object which represents the state at the time it was created
+is a <dfn export>static object</dfn>.
+
+<h4 id="live-objects" class="no-num no-toc">Live objects</h4>
+
+If an object allows the author to change the internal state,
+that object should be live.
+For example, DOM {{Node}}s are live objects,
+to allow the author to make changes to the document
+with an understanding of the current state.
+
+Properties of live objects may be computed as they are accessed,
+instead of when the object is created.
+This makes live objects sometimes a better choice
+if the data needed is complex to compute,
+since there is no need to compute all the data before the object is returned.
+
+A live object may also use less memory,
+since there is no need to copy data to a static version.
+
+<h4 id="static-objects" class="no-num no-toc">Static objects</h4>
+
+If an object represents a list that might change,
+most often the object should be static.
+This is so that code iterating over the list
+does not need to handle the possibility of the list changing in the middle.
+
+<div class="example">
+{{Document/getElementsByTagName()}} returns a live object which represents a list,
+meaning that authors need to take care when iterating over its items.
+
+<!-- does anyone know more specifics here? -->
+The choice to have {{ParentNode/querySelectorAll()}} return static objects
+was made after spec authors noticed that {{getElementsByTagName()}}
+was causing problems.
+
+{{URLSearchParams}} is not static,
+even though it represents a list,
+because it is the way for authors to change the query string of a URL.
+</div>
+
+Note:  For <a>maplike</a> and <a>setlike</a> types,
+this advice may not apply,
+since these types were designed to behave well
+when they change while being iterated.
+
+If it would be complex to keep the data needed by an object up to date,
+a static object avoids having to keep the object updated
+until it is garbage collected,
+even if it is not being used.
+<!-- why wouldn't it be computed lazily though? -->
+
+If a static object represents some state which may change frequently,
+it should be returned from a method,
+rather than available as an attribute.
+
+See also:
+
+* [[#attributes-like-data]]
+
+<h3 id="optional-parameters">Make function parameters optional if possible</h3>
+
+If a parameter for an API function has a reasonable default value,
+make that parameter optional and specify the default value.
+
+<div class="example">
+{{EventTarget/addEventListener()}} takes an optional boolean `useCapture` argument.
+Thie defaults to `false`, meaning that
+the event should be dispatched to the listener in the bubbling phase by default.
+</div>
+
+Note: Exceptions have been made for legacy interoperability reasons
+(such as {{XMLHttpRequest}}),
+but this should be considered a design mistake rather than recommended practice.
+
+The API must be designed so that if a parameter is left out,
+the default value used is the same as
+converting `undefined` to the type of the parameter.
+For example, if a boolean parameter is not set,
+it must default to false.
+
+See also:
+
+* [[#prefer-dict-to-bool]]
+
+<h3 id="prefer-dict-to-bool">Prefer dictionary parameters over primitive parameters</h3>
+
+API methods should generally use dictionary parameters
+instead of a series of optional primitive parameters.
+
+This makes the code that calls the method much more readable.
+It also makes the API more extensible in the future,
+particularly if multiple parameters with the same type are needed.
+
+<div class="example">
+For example,
+
+<pre highlight="js">
+new Event("example",
+          { bubbles: true,
+            cancelable: false})
+</pre>
+
+is much more readable than
+
+<pre highlight="js">
+new Event("example", true, false)
+</pre>
+
+Also,
+
+<pre highlight="js">
+window.scrollBy({ left: 50, top: 0 })
+</pre>
+
+is more readable than
+
+<pre highlight="js">
+window.scrollBy(50, 0)
+</pre>
+
+</div>
+
+The dictionary itself should be an optional parameter,
+so that if the author is happy with all of the default options,
+they can avoid passing an extra argument.
+
+<div class="example">
+For example,
+<pre highlight="js">
+element.scrollIntoView(false, {});
+</pre>
+is equivalent to
+<pre highlight="js">
+element.scrollIntoView(false);
+</pre>
+</div>
+
+See also:
+
+* <a href="https://ariya.io/2011/08/hall-of-api-shame-boolean-trap">Hall of API Shame: Boolean Trap</a>.
+* <a href="https://lists.w3.org/Archives/Public/public-script-coord/2013OctDec/0302.html">APIs that have boolean arguments defaulting to true</a>
+* [[#optional-parameters]]
+* [[#naming-optional-parameters]]
+
+<h3 id="naming-optional-parameters">Naming optional parameters</h3>
+
+Name optional parameters to make the default behavior obvious
+without being named negatively.
+
+This applies whether they are provided in a [dictionary](#prefer-dict-to-bool)
+or as [single parameters](#optional-parameters).
+
+<div class="example">
+{{EventTarget.addEventListener()}} takes an `options` object
+which includes an option named `once`.
+This indicates that the listener should **not** be invoked repeatedly.
+
+This option could have been named `repeat`,
+but that would require the [default](#optional-parameters) to be `true`.
+Instead of naming it `noRepeat`,
+the API authors named it `once`,
+to reflect the default behaviour without using a negative.
+
+Other examples:
+* `passive` rather than `active`, or
+* `isolate` rather than `connect`, or
+* `private` rather than `public`
+</div>
+
+See also:
+
+* [[#naming-is-hard]]
+
+<h3 id="constructors">Classes should have constructors when possible</h3>
+
+Make sure that any class that is part of your API has a constructor,
+if it is appropriate.
+
+By default, [[!WEBIDL]] interfaces are "non-constructible" classes:
+trying to create instances of them using `new X()` will throw a {{TypeError}}.
+To make them constructible,
+you can add appropriate [=constructor operation=] to your interface,
+and defining the algorithm for creating new instances of your class.
+
+This allows JavaScript developers
+to create instances of the class
+for purposes such as testing, mocking,
+or interfacing with third-party libraries which accept instances of that class.
+It also gives authors the ability to create a subclass of the class,
+which is otherwise prevented,
+because of the way JavaScript handles subclasses.
+
+This will not be appropriate in all cases.
+For example:
+* Some objects represent access to privileged resources,
+  so they need to be constructed by factory methods
+  which can access those resources.
+* Some objects have very carefully controlled lifecycles,
+  so they need to be created and accessed through specific methods.
+* Some objects represent an abstract base class,
+  which shouldn't be constructed,
+  and which authors should not be able to define subclasses for.
+
+<p class="example">
+The {{Event}} class, and all its derived interfaces, are constructible.
+This is useful when testing code which handles events:
+an author can construct an {{Event}} to pass to a method
+which handles that type of event.
+</p>
+
+<p class="example">
+The {{Window}} class is not constructible,
+because creating a new window is a privileged operation
+with significant side effects.
+Instead, the {{Window/open|window.open()}} method
+is used to create new windows.
+</p>
+
+<p class="example">
+The {{ImageBitmap}} class is not constructible,
+as it represents an immutable, ready-to-paint bitmap image,
+and the process of getting it ready to paint must be done asynchronously.
+Instead, the {{createImageBitmap()}} factory method is used to create it.
+</p>
+
+
+<p class="example">
+The {{DOMTokenList}} class is, sadly,
+<a href="https://www.w3.org/Bugs/Public/show_bug.cgi?id=27114">not constructible</a>.
+This prevents the creation of <a>custom elements</a>
+that expose their token list attributes as {{DOMTokenList}}s.
+</p>
+
+<div class="example">
+Several non-constructible classes,
+like {{Navigator}}, {{History}}, or {{Crypto}},
+are non-constructible because they are singletons
+representing access to per-window information.
+In these cases, something like the Web IDL <a>namespace</a> feature
+might have been a better fit,
+but were designed before namespaces,
+and go beyond what is currently possible with namespaces.
+
+If your API requires this type of singleton,
+consider using a <a>namespace</a>,
+and <a href="https://github.com/heycam/webidl/issues/new">File an issue on Web IDL</a>
+if there is some problem with using them.
+</div>
+
+
+<h3 id="promises">Design asynchronous APIs using Promises</h3>
+
+If an API function needs to be asynchronous, use Promises,
+not callback functions.
+
+Using Promises consistently across the Web platform
+means that APIs are easier to use together,
+such as by chaining promises.
+Promise-using code also tends to be easier to understand
+than code using callback functions.
+
+An API might need to be asynchronous if:
+  * the user agent needs to prompt the user for [permission](#consent),
+  * some information might need to be read from disk,
+    or requested from the network,
+  * the user agent may need to do a significant amount of work on another thread,
+    or in another process, before returning the result.
+
+See also:
+
+* <a href="https://www.w3.org/2001/tag/doc/promises-guide">Writing Promise-Using Specifications</a>
+
+<h3 id="aborting">Cancel asynchronous APIs/operations using AbortSignal</h3>
+
+If an asynchronous function can be cancelled,
+allow authors to pass in an {{AbortSignal}} as part of an options dictionary.
+
+<div class="example">
+```js
+const controller = new AbortController();
+const signal = controller.signal;
+geolocation.read({ signal });
+```
+</div>
+
+Consistently using `AbortSignal` as a mechanism
+for cancelling an asychronous operation
+means that authors can write less complex code.
+
+For example, there's a pattern of using a single `AbortSignal`
+for several ongoing operations,
+and then using the corresponding `AbortController`
+to cancel all of the operations at once if necessary
+(such as if the user presses "cancel",
+or a single-page app navigation occurs.)
+
+Even if cancellation can't be guaranteed.
+{{AbortController}} can still be used,
+because a call to {{AbortController/abort()}} on `AbortController`
+is a request, rather than a guarantee.
+
+<h3 id="string-constants">Use strings for constants and enums</h3>
+
+If your API needs a constant, or a set of enumerated values,
+use string values.
+
+Strings are easier for developers to inspect,
+and in JavaScript engines there is no performance benefit
+from using integers instead of strings.
+
+If you need to express a state which is a combination of properties,
+which might be expressed as a bitmask in another language,
+use a dictionary object instead.
+This object can be passed around as easily as a single bitmask value.
+
 <h2 id="event-design">Event Design</h2>
 
 <h3 id="one-time-events">Use promises for one time events</h3>
@@ -1135,189 +1136,183 @@ Promise-Using Specifications</a></strong> guideline.
 
 <h3 id="promises-and-events">Events should fire before Promises resolve</h3>
 
-In the case that an asynchronous algorithm (Promise based) intends to dispatch
-events, then such events should be dispatched before the Promise resolves, rather
-than after.
+If a Promise-based asynchronous algorithm dispatches events,
+it should dispatch them before the Promise resolves,
+rather than after.
 
-This ensures consistency, for instance if you have event handlers changing
-state, you want all that state to be applied before acting on the resolved
-promise, as you can subscribe to a promise at any time (before/after it has
-resolved or rejected).
+This guarantees that once the Promise resolves,
+all effects of the algorithm have been applied.
+For example, if an author changes some state
+in reaction to an event which the Promise dispatches,
+they can be sure that all of the state is consistentif the Promise is resolved.
 
 <h3 id="dont-invent-event-like">Don't invent your own event listener-like infrastructure</h3>
 
-For recurring events, it could be convenient to create a custom pair of APIs to
-`"register"`/`"unregister"`, `"subscribe"`/`"unsubscribe"`, etc., that take a
-callback and get invoked multiple times until paired cancel API is called.
+Use existing `EventTarget` and `Event` infrastructure
+to allow authors to subscribe to recurring notification events,
+rather than adding specific pairs of API methods like "register"/"unregister"
+or "subscribe"/"unsubscribe".
 
-Instead, use the existing event registration pattern and separate API controls
-to start/stop the underlying process (since event listeners should not have
-[[#events-are-for-notification|side-effects]]).
+The DOM API provides robust
+[event dispatching](https://dom.spec.whatwg.org/#dispatching-events) infrastructure.
+Take advantage of this, rather than re-inventing it.
 
-If the callback would have been provided specific data, then this data should
-be added to an `Event` object (but see <a href="#state-and-subclassing">State
-and `Event` subclasses</a> as this is not always necessary).
+If the author should be able to start or stop the process creating the notifications,
+provide a separate API to allow this.
 
-In some cases, you can transfer the state that would be surfaced in callback
-parameters into a more persistent object which, in turn, can inherit from
-`EventTarget`.
+<!-- TODO: example; the old one was confusing -->
 
-In some cases you might not have an object to inherit from `EventTarget` but
-it is usually possible to create such an object.
+See also:
 
-For instance with Web Bluetooth you can add event listeners on a `Characteristic`
-object, which is obtained via `getCharacteristic()`. If you need to filter events,
-it might be possible to create a filter like
-
-```js
-const filter = navigator.nfc.createReadFilter({
-  recordType: "json"
-});
-
-const onMessage = message => { … };
-filter.addEventListener('exchange', onMessage);
-```
+* [[#events-are-for-notification]]
+* [[#state-and-subclassing]]
 
 <h3 id="always-add-event-handlers">Always add event handler attributes</h3>
 
-For an object that inherits from {{EventTarget}}, there are two techniques available for registering
-an event handler (e.g., an event named "somethingchanged"):
+If your API adds a new event type,
+add a corresponding <code>on<em>yourevent</em></code> [=event handler IDL attribute=]
+to the interface of any {{EventHandler}} which may handle the new event.
 
-1. {{EventTarget/addEventListener()}} which allows authors to register for the event using the
-    event's name (i.e.,
-    <code highlight="js">someobject.addEventListener("somethingchanged", myhandler)</code>) and
-2. `onsomethingchanged` IDL attributes which allow one event handler to be directly assigned to the
-    object (i.e., <code highlight="js">someobject.onsomethingchanged</code>).
-
-Because there are two techniques for registering events on objects inheriting from {{EventTarget}},
-authors may be tempted to omit the corresponding [=event handler IDL attributes=]. They may assume
-that event handler IDL attributes are a legacy registration technique or are simply not needed
-given that {{EventTarget/addEventListener()}} is available as an alternative. However, it is
-important to continue to define event handler IDL attributes because:
+It is important to continue to define event handler IDL attributes because:
 
 * they preserve consistency in the platform
 * they enable feature-detection for the supported events (see [[#feature-detect]])
 
-So, if the object inherits from {{EventTarget}}, add a corresponding
-<code>on<em>yourevent</em></code> [=event handler IDL attribute=] to the interface.
-
-<p class="note">Note that for HTML and SVG elements, it is traditional to add the
-[=event handler IDL attributes=] on the {{GlobalEventHandlers}} interface mixin, instead of
-directly on the relevant element interface(s). Similarly, [=event handler IDL attributes=]
-are traditionally added to {{WindowEventHandlers}} rather than {{Window}}.</p>
+<p class="note">
+For consistency, if the event needs to be handled by HTML and SVG elements,
+add the [=event handler IDL attributes=]
+on the {{GlobalEventHandlers}} interface mixin,
+instead of directly on the relevant element interface(s).
+Similarly, add [=event handler IDL attributes=]
+to {{WindowEventHandlers}} rather than {{Window}}.
+</p>
 
 
 <h3 id="events-are-for-notification">Events are for notification</h3>
+
+Note: I can't understand this one well enough to rewrite it.
 
 Try to design DOM events to deliver after-the-fact notifications of changes. It may be tempting to try to trigger side-effects from the action of {{EventTarget/dispatchEvent()}}, but in general this is <a href="https://lists.w3.org/Archives/Public/public-webapps/2014AprJun/0510.html">strongly discouraged</a> as it requires changes to the DOM specification when added. Your design will proceed more quickly if you avoid this pattern.
 
 <h3 id="guard-against-recursion">Guard against potential recursion</h3>
 
-When designing a long-running or complicated algorithm that is initiated by an
-API call, events are appropriate for [[#events-are-for-notification|notifying]]
-user code of the ongoing process. However, they also introduce the possibility of unexpected
-re-execution of the current algorithm before it has finished! Because user code gets
-to run in the middle of the algorithm, recursion can happen if that user code triggers
-the algorithm again (directly or indirectly).
+If your API includes a long-running or complicated algorithm,
+add state data to track whether the algorithm is running,
+and do not run the algorithm if it is already running.
 
-To address this, if the algorithmic complexity and call graph is reasonably understood, add appropriate
-state to track that the algorithm is in progress and terminate immediately if the algorithm
-is already concurrently running. This technique is "guarding" the algorithm:
+If an API method causes a long-running algorithm to begin,
+it is appropriate to use [[#events-are-for-notification|events]]
+to notify user code of the progress of the algorithm.
+However, the user code which handles the event may call the same API method,
+causing the complex algorithm to run recursively
+(since the same event may be fired again,
+causing the same event handler to be fired, and so on).
+
+To prevent this, make sure that any "recursive" call into the API method
+simply returns immediately. This technique is "guarding" the algorithm.
 
 <div class="example">
-    The following is a technique (e.g., as used in the [=AbortSignal/add|AbortSignal's add algorithm=]
-    or as a stack-based variation in the [=focus update steps=])
-    for guarding against unplanned recursion.
+{{AbortSignal}}'s [=AbortSignal/add=],
+[=AbortSignal/remove=] and [=signal abort=]
+each begin with a check
+of the signal's [=aborted flag=].
+If the flag is set, the rest of the algorithm does not run.
 
-    In this example, an object of type <dfn noexport interface>MyObject</dfn> has
-    a method <dfn method for="MyObject">doComplexOpWithEvents()</dfn> and
-    an internal state attribute [[<dfn noexport attribute for="MyObject">started</dfn>]]
-    referenced below as
-    {{MyObject|this}}.[[{{started}}]] whose initial
-    value is `false`.
+In this case, a lot of the important complexity is
+in the algorithms run during the [=signal abort=] steps.
+These steps iterate through a collection of algorithms
+which are managed by the [=AbortSignal/add=] and [=AbortSignal/remove=] methods.
 
-    The {{doComplexOpWithEvents()}} method must act as follows:
+For example, the
+[ReadableStreamPipeTo](https://streams.spec.whatwg.org/#readable-stream-pipe-to)
+definition [=AbortSignal/add=]s an algorithm
+into the {{AbortSignal}}'s set of algorithms to be run
+when the [=signal abort=] steps are triggered,
+by calling {{AbortController/abort()}}
+on the {{AbortController}} associated with the signal.
 
-    1. If {{MyObject|this}}.[[{{started}}]] is not `false` then throw an {{InvalidStateError}}
-        {{DOMException}} and terminate this algorithm.
+This algorithm is likely to resolve promises causing code to run,
+which may include attempting to call any of the methods on {{AbortSignal}}.
+Since [=signal abort=] involves iterating through the collection of algorithms,
+it should not be possible to modify that collection while it is running.
 
-        Note: {{doComplexOpWithEvents()}} is not allowed to be run again
-        (e.g., from within a `"currentlyinprogress"` event handler) before it finishes
-        its original execution.
-
-    2. Set {{MyObject|this}}.[[{{started}}]] to `true`.
-
-    3. ...Do complex stuff...
-
-    4. [=Fire an event=] named `"currentlyinprogress"` at {{MyObject|this}}.
-
-    5. ...Finish up complex stuff...
-
-    6. Set {{MyObject|this}}.[[{{started}}]] to `false`.
+And since [=signal abort=] would have triggered the code which caused
+the recursive call back in to [=signal abort=],
+it is important to avoid running these steps again
+if the signal is already in the process of the [=signal abort=] steps,
+to avoid recursion.
 </div>
 
-Note: A caution about early termination: if the algorithm being terminated would go
-on to ensure some critical state consistency, be sure to also make the relevant adjustments
-in state before early termination of the algorithm. Not doing so can lead to inconsistent
-state and end-user-visible bugs when implemented as-specified.
+Note: A caution about early termination:
+if the algorithm being terminated
+would go on to ensure some critical state consistency,
+be sure to also make the relevant adjustments in state
+before early termination of the algorithm.
+Not doing so can lead to inconsistent state
+and end-user-visible bugs when implemented as-specified.
 
-Note: A caution about throwing exceptions in early termination: keep in mind the scenario
-in which developers will be invoking the algorithm, and whether they would reasonably
-expect to handle an exception in this [perhaps rare] case. For example, will this
-be the only exception in the algorithm?
+Note: A caution about throwing exceptions in early termination:
+keep in mind the scenario in which developers will be invoking the algorithm,
+and whether they would reasonably expect to handle an exception
+in this [perhaps rare] case.
+For example, will this be the only exception in the algorithm?
 
+<!-- Previously this read as:
 Sometimes "guarding" as illustrated above cannot be done because of the complexity
 of the algorithm, the number of potential algorithm entry-points, or the side-effects
-beyond the algorithm's control. In these cases another form of protecting the integrity
-of the algorithm's state is to "defer" the event to a subsequent task or microtask.
-Deferral ensures that any stack-based recursion is avoided (but does not eliminate
-potentially problematic loops, as they could now occur as unending follow-up tasks).
+beyond the algorithm's control.
+I'm not sure what a good example of "the complexity of the algorithm" or
+"side effects beyond the algorithm's control" might be.
+-->
+
+It is not always possible to "guard" in this way.
+For example, an algorithm may have too many entry-points to reliably check all of them.
+If that is the case,
+another option is to defer calling the author code
+to a later task or microtask.
+This avoids a stack of recursion,
+but can't avoid the risk of an endless loop of follow-up tasks.
 
 Deferring an event is often specified as "[=queue a task=] to [=fire an event=]...".
 
-By way of illustration, the deprecated
-[Mutation Events](https://developer.mozilla.org/en-US/docs/Web/Guide/Events/Mutation_events)
-fired in the middle of node insertion and removal algorithms, and
-could be triggered by a variety of common API calls like {{Node/appendChild()}}. The side-effects
-from recursively running node mutation algorithms caused many years of security issues.
-A more robust approach embodied in
-{{MutationObserver}}
-applies the principle of deferral of notification — in this case to the microtask queue
-following the algorithm.
+Deferring events is always necessary
+if the algorithm that triggers the event could be running
+on a different thread or process.
+In this case deferral ensures the events
+can be processed on the correct task in the [=task queue=].
 
-Also note that deferral of events is always necessary if the algorithm that triggers
-the event could be running on a different thread or process. In this case deferral
-ensures the events can be processed on the correct task in the [=task queue=].
+Both the "guarding" and the "deferring" approach have trade-offs.
 
-Both approaches to protecting against unwanted recursion have trade-offs. Some things
-to consider when choosing the guarding approach:
+"Guarding" an algorithm guarantees:
 
-* all state management can be rationalized within one "turn" of the algorithm (no
-    need to consider any state changes or API invocations between the time the algorithm
-    completes and when the event fires).
-* events can reveal internal state changes as early as possible when dispatched immediately
-    in the algorithm (resulting in minimal delay to user code that wants to act on
-    that state).
-* events do not need to carry snapshots (copies) of internal state because user code
-    running in the event handler can observe relevant state directly on the instance
-    object they were fired on (avoiding the need to derive a new type of {{Event}}
-    to hold such state snapshots).
+* at the time events are fired,
+  there is no chance that the state may have changed
+  between the guarded algorithm ending and the event firing.
+* events fired during the algorithm,
+  such as events to notify user code of a state change made as part of the algorithm,
+  can be fired immediately,
+  notifying code of the change without needing to wait for the next task.
+* user code running in the event handler can observe relevant state directly
+  on the instance object they were fired on,
+  rather than needing to be given a copy of the relevant state with the event.
 
-When deferring, event handlers will run after the algorithm ends (or starts
-to run [=in parallel=]) and any number of other tasks or microtasks may run in between
-that invalidate the object's state. Since the object's state will be unknown when
-the deferred event is dispatched, consider the following:
+If the events are deferred instead,
+there is no guarantee that they will be first in the [=task queue=]
+once the algorithm completes.
 
-* state relevant to the event should be packaged with the deferred event, usually
-    involving a new {{Event}}-derived type with new attributes to hold the state.
-    For example, the {{ProgressEvent}} adds {{ProgressEvent/loaded}},
-    {{ProgressEvent/total}}, etc. attributes to hold the state.
-* any coordination needed among parts of an algorithm using deferred events often
-    requires defining an explicit state machine (well-defined state transitions) to
-    ensure that when a deferred event fires, the behavior of inspecting or changing
-    state is well-defined. For example, in [[payment-request]], the {{PaymentRequest}}'s
-    [=[[state]]=] internal slot explicitly tracks the object's state
-    through its well-defined transitions.
+Any other task may change the object's state, so:
+* state relevant to the event should be packaged with the deferred event,
+  usually involving a new {{Event}}-derived type with new attributes to hold the state.
+  For example, the {{ProgressEvent}} adds {{ProgressEvent/loaded}},
+  {{ProgressEvent/total}}, etc. attributes to hold the state.
+* any coordination needed among parts of an algorithm using deferred events
+  often requires defining an explicit state machine (well-defined state transitions)
+  to ensure that when a deferred event fires,
+  the behavior of inspecting or changing state is well-defined.
+  For example, in [[payment-request]],
+  the {{PaymentRequest}}'s [=[[state]]=] internal slot
+  explicitly tracks the object's state
+  through its well-defined transitions.
     * in addition to defining state transitions, each coordinated algorithm usually
         applies the guarding technique (anyway) to ensure the algorithm can only proceed
         under the appropriate set of states. For example, in [[payment-request]] note
