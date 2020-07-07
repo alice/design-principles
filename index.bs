@@ -771,7 +771,7 @@ or to produce a new {{HTMLCollection}} each time it's invoked.
 
 {{Document/getElementsByTagName}} gives no sign that
 it may depend on the timing of garbage collection.
-In contrast, APIs which are explicitly designed 
+In contrast, APIs which are explicitly designed
 to depend on garbage collection,
 like `WeakRef` or `FinalizationGroup`,
 set accurate author expectations about
@@ -1099,7 +1099,7 @@ geolocation.read({ signal });
 ```
 </div>
 
-Using `AbortSignal` consistently 
+Using `AbortSignal` consistently
 as the way to cancel an asychronous operation
 means that authors can write less complex code.
 
@@ -1179,17 +1179,17 @@ to {{WindowEventHandlers}} rather than {{Window}}.
 Issue: I can't understand this one well enough to rewrite it.
 Anyone got an example or counter-example?
 
-Try to design DOM events to deliver after-the-fact notifications of changes. 
-It may be tempting to try to trigger side-effects 
+Try to design DOM events to deliver after-the-fact notifications of changes.
+It may be tempting to try to trigger side-effects
 from the action of {{EventTarget/dispatchEvent()}},
-but in general this is 
-<a href="https://lists.w3.org/Archives/Public/public-webapps/2014AprJun/0510.html">strongly discouraged</a> 
-as it requires changes to the DOM specification when added. 
+but in general this is
+<a href="https://lists.w3.org/Archives/Public/public-webapps/2014AprJun/0510.html">strongly discouraged</a>
+as it requires changes to the DOM specification when added.
 Your design will proceed more quickly if you avoid this pattern.
 
 <h3 id="guard-against-recursion">Guard against potential recursion</h3>
 
-Issue: This gets very into the weeds. 
+Issue: This gets very into the weeds.
 
 If your API includes a long-running or complicated algorithm,
 prevent calling into the algorithm if it's already running.
@@ -1339,7 +1339,7 @@ It's usually not necessary to create new subclasses of {{Event}}.
 
 <h3 id="events-vs-observers">How to decide between Events and Observers</h3>
 
-Issue: This gets very into the weeds. 
+Issue: This gets very into the weeds.
 
 In general, use {{EventTarget}} and notification {{Event}}s,
 rather than an Observer pattern,
@@ -1629,13 +1629,12 @@ use {{Uint8Array}}.
 
 <h3 id="milliseconds">Use milliseconds for time measurement</h3>
 
-If you are designing API that accepts a time measurement,
+If you are designing an API that accepts a time measurement,
 express the time measurement in milliseconds.
 
-Even if seconds (or some other time unit) 
-are more natural in the domain of an API,
-sticking with milliseconds ensures that 
-APIs are interoperable (consistent) with one another.
+Even if seconds (or some other time unit) are more natural in the domain of an API,
+sticking with milliseconds ensures that APIs
+are interoperable with one another.
 This means that authors don't need to convert values used in one API
 to be used in another API,
 or keep track of which time unit is needed where.
@@ -1670,7 +1669,7 @@ and there is no way to make them immutable.
         on the Web IDL Bugzilla
 </div>
 
-{{DOMTimeStamp}} values represent 
+{{DOMTimeStamp}} values represent
 the number of milliseconds since 1970-01-01T00:00:00Z.
 They are derived from the system's clock,
 which may be changed by the user,
@@ -1724,13 +1723,13 @@ This section contains principles for consideration when designing APIs for devic
 
 Issue: This gets very into the weeds.
 
-Think carefully about
-whether it's really necessary
+If you need to give web sites access to information about a device,
+use the guidelines below to decide what information to expose.
+
+Firstly, think carefully about whether it is really necessary
 to expose identifying information about the device at all.
 Consider whether your [user needs](#priority-of-constituencies) could be satisfied
 by a less powerful API.
-If you need to expose identifying information about the device,
-do so following the guidelines below.
 
 Exposing the presence of a device,
 additional information about a device,
@@ -1739,9 +1738,9 @@ each increase the risk of harming the user's privacy.
 
 One risk is that as more specific information is shared,
 the set of
-[fingerprinting data](https://www.w3.org/TR/fingerprinting-guidance/) 
+[fingerprinting data](https://www.w3.org/TR/fingerprinting-guidance/)
 available to sites gets larger.
-There are also [other potential risks](https://w3cping.github.io/privacy-threat-model/) 
+There are also [other potential risks](https://w3cping.github.io/privacy-threat-model/)
 to user privacy.
 
 Issue: Privacy Threat Model is not ready for prime time.
@@ -1773,7 +1772,7 @@ use these guidelines when exposing device information:
 :: If the same device is requested more than once
     by the same origin, return the same id for it
     (unless the user has cleared their browsing data).
-    This allows authors to avoid having 
+    This allows authors to avoid having
     several copies of the same device.
 : Persistable when necessary
 :: If a device id is time consuming to obtain,
@@ -1798,30 +1797,28 @@ If you can't avoid it, expose the least information possible.
 
 If an API exposes the the existence, capabilities, or identifiers of more than one device,
 all of the risks in [[#device-ids]]
-are multiplied by the number of devices. For the same reasons, consider whether your 
-[user needs](#priority-of-constituencies) could be satisfied
+are multiplied by the number of devices.
+For the same reasons,
+consider whether your [user needs](#priority-of-constituencies) could be satisfied
 by a less powerful API. [[LEAST-POWER]]
 
 If the purpose of the API
 is to enable the user **to select a device**
 from the set of available devices of a particular kind,
 you may not need to expose a list to script at all.
-An API which invokes a User-Agent-provided device picker
-could suffice.
-Such an API
-keeps the user in control,
-doesn't expose any device information without the user's [consent](#consent)
-doesn't expose any fingerprinting data about the user's environment by default,
-and only exposes information about one device at a time.
+An API which invokes a User-Agent-provided device picker could suffice.
+Such an API:
+- keeps the user in control,
+- doesn't expose any device information without the user's [consent](#consent),
+- doesn't expose any fingerprinting data about the user's environment by default, and
+- only exposes information about one device at a time.
 
 When designing API which allows users to select a device,
 it may be necessary to also expose
 the fact that there are devices are available to be picked.
-This does expose 
-one bit of fingerprinting data about the user's environment
+This does expose one bit of fingerprinting data about the user's environment
 to websites,
-so it isn't quite as safe as
-an API which doesn't have such a feature.
+so it isn't quite as safe as an API which doesn't have such a feature.
 
 <div class=example>
 The {{RemotePlayback}} interface
@@ -1838,104 +1835,90 @@ The trade-off is that by allowing websites
 this extra bit of information,
 the API lets authors make their user interface less confusing.
 They can choose to show a button to trigger the picker
-only if at least one device is available. 
+only if at least one device is available.
 </div>
 
 If you must expose a list of devices,
 try to **expose the smallest subset**
 that satisfies your user needs.
-Consider an API which allows the website
-to request **a filtered or constrained list** of devices.
-Keep in mind that
-constraint-matching systems may reveal more information than intended
-if authors can make multiple requests with different constraints.
 
-If you must expose the full list of devices of a particular kind,
+For example, an API which allows the website
+to request **a filtered or constrained list** of devices
+is one option to keep the number of devices smaller.
+However, if authors are allowed to make multiple requests with different constraints,
+they may still be able to access the full list.
+
+Finally, if you must expose the full list of devices of a particular kind,
 please rigorously **define the order** in which devices will be listed.
 This can reduce interoperability issues,
 and helps to mitigate fingerprinting.
 (Sort order could reveal other information:
 see [[FINGERPRINTING-GUIDANCE#a_standardized_profile]] for more.)
 
-While APIs should not
+Note: While APIs should not
 expose a full list of devices in an [=implementation-defined=] order,
 they may need to for web compatibility reasons.
 
 <h3 id="wrapper-apis">Native APIs don't typically translate well to the web</h3>
 
+Issue: Many of these seem like they could be first-class principles.
 
-Many modern operating systems come with convenience APIs, which abstract away
-normally complex technology in the form of higher level user-friendly APIs.
+Issue: Needs (specific) examples.
 
-Exposing these APIs to the web platform is getting more and more common, but you
-need to be careful when exposing these to the web platform.
+When adapting native operating system APIs for the web,
+make sure the new web APIs are designed with web platform principles in mind.
 
- : Generalize interface when underlying API is overly specific
- :: Don't blindly map native convenience APIs 1:1 to the web platform.
-    Native APIs do not translate well to the web platform, and doing so may result
-    in a API shape which is difficult to implement across a variety of underlying
-    platforms and native libraries.
+ : Design based on functionality, not based on the existing API
+ :: You will probably not be able to directly translate
+    an API available to native applications
+    to be a web API.
 
-    Especially be careful about exposing the exact lifecycle and data
-    structures of the underlying native APIs. Think about making an API that
-    [[#string-constants|fits well in with existing web platform APIs]] and which can be expressed in
-    commonly available low-level APIs.
+    Instead, consider the functionality available from the native API,
+    and the user needs it addresses,
+    and design an API which meets those user needs,
+    even if the implmentation depends on the existing native API.
 
- : Prefer asynchronous function by returning promises
- :: Even if the underlying API is synchronous, this does not necessarily mean it
-    translates well when ported to the web platform. Exposing a synchronous native
-    API to the web platform is generally discouraged, and should be
-    provided as a promise based API whenever possible.
+    Be particularly careful about exposing
+    the exact lifecycle and data structures of the underlying native APIs.
 
-    Doing this also allows putting the API behind a permission if it is
-    necessary, especially if the API depends on I/O or in the future may need to
-    be isolated to a separate process.
+ : Make sure the web API can be implemented on more than one platform
+ :: When designing a wrapper API,
+    consider how different platforms provide its functionality.
 
- : Don't overconstrain or overfit the API to the underlying (wrapped) OS
- :: When designing a wrapper API, you should consider how different implementations
-    (operating systems and platforms) provide this functionality. Ideally the entire
-    specification is implementable across platforms, but in some cases it may be
-    desirable to expose distinctions made on only some platforms.
-
-    These distinctions should be clearly noted if they are known in advance.
-
- : Do not propose black-box proprietary library or dedicated hardware processor dependencies
- :: Black-box dependencies are strongly discouraged, as this not only prevents wide
-    implementor adoption, but is unhealthy to the open nature of the web.
+    Ideally, all implementations should work exactly the same,
+    but in some cases you may have a reason to expose options
+    which only work on some platforms.
+    If this happens, be sure to explain
+    how authors should write code which works on all platforms.
+    See [[#feature-detect]].
 
  : Underlying protocols should be open
- :: APIs which require exchange with external hardware or services should not depend
-    on closed protocols.
+ :: APIs which require exchange with external hardware or services
+    should not depend on closed or proprietary protocols.
+    Depending on non-open protocols undermines the open nature of the web.
 
- : Be offline friendly
- :: Web platform APIs should ideally not have a hard dependency on online services.
-    The availability of these services across different regions may vary, users
-    may be offline, and the online services have no guarantee of being always
-    available.
+ : Design APIs to handle the user being off-line
+ :: If an API depends on some service which is provided by a remote server,
+    make sure that the API functions well when the user can't access the remote server
+    for any reason.
 
  : Avoid additional fingerprinting surfaces
- :: Wrapper APIs can expose unintentionally expose the user to a wider fingerprinting surface.
+ :: Wrapper APIs can expose unintentionally expose the user to
+    a wider fingerprinting surface.
     Please read the TAG's finding on
     <a href="http://www.w3.org/2001/tag/doc/unsanctioned-tracking/">unsanctioned tracking</a>
     for additional details.
 
 <h2 id="other-considerations">Other API Design Considerations</h2>
 
-<h3 id="design-resources">Privacy, Security, Accessibility, and Internationalization</h3>
-
-It is important not to neglect other aspects of API design such as privacy, security, accessibility, and internationalization.
-Please take advantage of these other excellent resources in your design process:
-
-* <a href="https://w3c.github.io/privacy-considerations/">Privacy Considerations for Web Protocols</a>
-* <a href="https://www.w3.org/TR/security-privacy-questionnaire/">Self-Review Questionnaire: Security and Privacy</a>
-* <a href="https://w3c.github.io/apa/fast/">Web Technology Accessibility Guidelines</a>
-* <a href="https://w3c.github.io/bp-i18n-specdev/">Internationalization Best Practices for Spec Developers</a> <!-- also at https://www.w3.org/TR/international-specs/ -->
-
 <h3 id="polyfills">Polyfills</h3>
 
-Polyfills can be hugely beneficial in helping to roll out new features to the web platform. The
-Technical Architecture Group <a href="https://www.w3.org/2001/tag/doc/polyfills/">finding on Polyfills and the Evolution of the Web</a> offers guidance
-that should be considered in the development of new features, notably:
+Issue: is this advice still current? When was the last time we saw a review with a speculative polyfill?
+
+Polyfills can be hugely beneficial
+in helping to roll out new features to the web platform.
+The Technical Architecture Group <a href="https://www.w3.org/2001/tag/doc/polyfills/">finding on Polyfills and the Evolution of the Web</a>
+offers guidance that should be considered in the development of new features, notably:
 
 * Being "polyfillable" isn't essential but <strong>is</strong> beneficial
 * [[#feature-detect]]
@@ -1943,30 +1926,8 @@ that should be considered in the development of new features, notably:
 
 <h3 id="extend-manifests">Extend existing manifest files rather than creating new ones</h3>
 
-New web features should be self-contained and self-describing and ideally should not require an additional manifest file.
-Manifest files can add complexity to the development and deployment process for web technologies.  Sometimes manifest
-files are required, but the use of different manifests on the web should be kept to a minimum.
-
-You may need to make a new manifest file if the domain of the manifest file is different from the existing manifest files.
-For example, if the fetch timing is different, or if the complexity of the manifest warrants it.  Application metadata should be added
-to the Web App Manifest or be an extension of it.
-Manifests designated to be used for specific applications or which require interoperability with non-browsers may need to take a different approach.
-Payment Method Manifest, Publication Manifest, and Origin Policy are examples of these cases.
-
-For example, if you have a single piece of metadata, even if the fetch timing is different than an existing manifest,
-it is probably best to use an existing manifest (or ideally design the feature in such a way that a manifest is not required).
-However, if your feature requires a complex set of metadata specific to a functional domain, the creation of a new manifest may be justified.
-
-Note that in all cases, the naming conventions should be harmonized (see section 2.2)
-
-Note: By principle, existing manifests use lowercase, underscore-delimited names.
-There have been times where it has been beneficial to re-use dictionaries from a manifest in DOM APIs as well, which are camel-cased.
-One such example is the <a href="https://w3c.github.io/image-resource/">image resource</a>. For this reason, if a
-key can clearly be expressed as a single word, that is recommended.
-
-When designing new keys and values for a manifest, make sure they are needed (that is, they enable well-thought-out use-cases).
-Also, please check if a similar key exists. If an existing key/value pair does more or less what is needed,
-work with the existing spec to extend it to your use-case if possible.
+If your feature requires a manifest,
+investigate whether you can extend an existing manifest schema.
 
 Some of the existing manifest files include
 
@@ -1976,20 +1937,39 @@ Some of the existing manifest files include
 * <a href="https://wicg.github.io/origin-policy/">Origin Policy</a> which is used to set security policies.
 
 We encourage people to think of manifest files as extensible.
-Always try to get the changes into the original spec, or at least discuss the extension with the spec editors.
-Having this discussion is more likely to result in a better design and lead to something that better integrates with the platform.
+Always try to get the changes into the original spec,
+or at least discuss the extension with the spec editors.
+Having this discussion is more likely to result in a better design
+and lead to something that better integrates with the platform.
 
-There are certain times the spec authors might not want to
-integrate immediately due to process (like going to CR) or due to it having a different scope, like extensions to Web App
-Manifest only affecting store or payment use-cases. In that case, it's acceptable to monkey-patch as long as that is agreed
-with the original spec editors.
+<div class="note">
+There are certain times the original spec authors might not want
+to integrate changes to their manifest format immediately.
+This may be due to process (like going to CR),
+or due to the addition having a different scope,
+like extensions to Web App Manifest only affecting store or payment use-cases.
+In that case, it is acceptable to monkey-patch
+as long as that is agreed with the original spec editors.
 
-ISSUE(184): when we write up a principle on monkey patching, be sure to take this nuance into account.
+ISSUE(184): when we write up a principle on monkey patching,
+be sure to take this nuance into account.
 
-An example of something that was done as a monkey patch that is scheduled to be integrated into the web app manifest in
-a future level (post-CR):
+An example of something that was done as a monkey patch
+that is scheduled to be integrated into the web app manifest in a future level (post-CR):
 
 * https://wicg.github.io/web-share-target/#extension-to-the-web-app-manifest
+<div>
+
+However, if your feature requires a complex set of metadata specific to a functional domain,
+the creation of a new manifest may be justified.
+
+Note that in all cases, the naming conventions should be harmonized (see [[#naming-is-hard]]).
+
+Note: By principle, existing manifests use lowercase, underscore-delimited names.
+There have been times where it was useful to re-use dictionaries from a manifest in DOM APIs as well,
+which meant converting the names to camel-cased version.
+One such example is the <a href="https://w3c.github.io/image-resource/">image resource</a>.
+For this reason, if a key can clearly be expressed as a single word, that is recommended.
 
 <h2 id="spec-writing">Writing good specifications</h2>
 
@@ -2000,80 +1980,91 @@ for the APIs that they design.
 <h3 id="requirements-on-authors-and-implementers">Identify the audience of each requirement in your specification</h3>
 <!-- was "Conformance for Documents and Implementations" in the HTML Design Principles -->
 
-The web platform is,
-unusually,
+Document both how authors should write good code using your API,
+and how implementers of your API should handle poorly-written code.
+
+The web platform is, unusually,
 designed to be robust in accepting poorly-formed markup.
+This means that web pages which use older versions of web standards
+can still be viewed in newer user agents,
+and also that authors have a shallower learning curve.
 
-When writing specifications for the web,
-be sure to note authoring requirements
-for well-formed markup (the "conforming language"),
-and also
-implementation requirements
-for handling poorly-formed markup (the "supported language").
+To support this,
+web specification writers need to describe how to interpret
+poorly-formed markup,
+as well as well-formed markup.
 
-This allows us to
-have a relatively clean and understandable language for authors,
-while at the same time supporting existing documents
-that make use of older or nonstandard constructs,
-and enabling better interoperability in error handling.
+Implementers need to be able to understand the "supported language",
+which is more complex than the "conforming language"
+which authors should be aiming to use.
+
+<div class="example">
+For example,
+the [Processing model](https://html.spec.whatwg.org/multipage/tables.html#table-processing-model)
+for the `<table>` element
+explains how to process the contents of a `<table>` element,
+including cases where the contents do not conform
+to the [Content model](https://html.spec.whatwg.org/multipage/tables.html#the-table-element:concept-element-content-model).
 
 <h3 id="avoid-ambiguity">Specify completely and avoid ambiguity</h3>
 <!-- was "Well-defined behavior" in the HTML Design Principles -->
 
-If the specification leaves room for implementations to make different choices
-which mean authors need to write different markup for different implementations,
-this adds a maintenance burden for authors.
+When specifying how a feature should work,
+make sure that there is enough information
+so that authors don't have to
+write different code to work with different implementations.
 
-The specification should be complete enough
-for implementations to be interoperable,
-without depending on or referring to the details of other implementations.
-When there isn't a good reason to allow variation between implementations,
-it is important that things be specified unambiguously,
-so that implementations interoperate
-and web content doesn't end up
-depending on the [=implementation-defined=] behavior
-in one implementation and failing in another
-(which can cause higher development costs to fix the content for all browsers,
-or costs to users of broken content if it wasn't detected).
-This way,
-it is easier to author content
-that works in a variety of user agents.
-However,
-implementations should still be free
-to make improvements
-in areas such as user interface
-and quality of rendering.
+If a specification isn't specific enough,
+implementers might make different choices
+which force authors to write extra code to handle the differences.
+
+Implementers shouldn't need to check details of other implementations
+to avoid this situation.
+Instead, the specification should be complete and clear enough
+on its own.
+
+Note: This doesn't mean that implementations can't render things differently,
+or show different user interfaces for things like permission prompts.
 
 <h4 id="algorithms">Defining algorithms in specifications</h4>
 
-Specification text is often more precise
-when it's written using an explicit sequence of steps.
-Using an ordered sequence of steps makes it clear how the required behaviors interact.
-For example, if there are multiple error conditions present,
-a specification that describes the behavior using a sequence of steps
-will make it clear which error will be reported,
-since the different errors would be checked and reported in different steps.
+Write algorithms in a way that is clear and concise.
 
-However, sequences of steps
-are not the only way to make a specification precise enough.
-When there are particular characteristics
-that specification editors want to ensure the specification always satisfies,
-it may be better to use a less algorithmic way of formal specification
-that ensures these characteristics are always true.
-Developing these other ways of specifying behavior formally
-is more important when the algorithms would be more repetitive.
-These formal specification techniques can include dependencies on
-languages such as [[WEBIDL]], on grammar productions,
-or the development of new languages for defining pieces of the specification.
-Merely having a formal syntax is not sufficient, though;
-the requirements that the formal definitions place on implementations must still be clearly defined,
-which generally requires specifying some algorithms (or, sometimes, another layer of formal syntax) that define what the formal syntax means,
-and then using the more-readable formal syntax to avoid
-excessive repetition of the less-readable algorithms.
-There are also possibilities in-between, for example,
-if it's desirable to ensure that an algorithm can be implemented with a state machine,
-it may be preferable to specify it in an algorithmic way that incorporates explicit states
-so that the specification authors avoid accidentally creating more states than intended.
+The most common way to write algorithms
+is to write an explicit sequence of steps.
+This often looks like pseudo-code.
+
+<div class="example">
+The {{HTMLDialogElement/showModal()}} method is described as a numbered sequence of steps
+which clearly explains when to throw exceptions
+and when to run algorithms defined in other parts of the HTML spec.
+</div>
+
+When writing a sequence of steps,
+imagine that it is a piece of functional code.
+
+- Clearly specify the inputs and outputs,
+name the algorithm and the variables it uses well,
+and explicitly note the points in the algorithm where the algorithm may
+return a result or error.
+- As much as possible, avoid writing algorithms which have side effects.
+
+Summarize the purpose of the algorithm before going into detail,
+so that readers can decide whether to read the steps or skip over them.
+For example take the following steps, which ensure that there is at most one pending X
+callback per toplevel browsing context".
+
+Issue: The paragraph below may not be comprehensive enough.
+
+A plain sequence of steps is not always the best way to write an algorithm.
+For example, it might make sense to define
+or re-use a formal syntax or grammar
+to avoid repetition,
+or define specific states to be used in a state machine.
+When using extra constructs like these,
+the earlier advice still applies.
+
+Issue: I don't understand the paragraph below.
 
 When specifying in an algorithmic way,
 it is generally good to match the algorithms that implementations would use,
@@ -2090,27 +2081,15 @@ It also helps to keep the costs of specifying features aligned with implementing
 since the complexity of adding a feature to the specification is more likely to be related
 to the cost of adding it to implementations.
 
-Algorithms in specifications should also reflect best practices in programming.
-For example, they should explicitly describe the inputs and outputs of the algorithm,
-rather than relying on "stack introspection" or handwaving.
-They should also avoid side-effects when possible.
-
-[[!INFRA]] offers
-<a href="https://infra.spec.whatwg.org/#algorithms">some useful definitions
-and terminology</a>
-for defining algorithms.
-
-Specifications that define things using step-by-step algorithms should still be readable.
-Partly, this is through good practices that also apply to writing code,
-such as avoiding unneeded extra steps, and by using good naming.
-However, it's often useful to explain the purpose of the algorithm in prose
-(e.g., "take the following steps, which ensure that there is at most one pending X
-callback per toplevel browsing context")
-so that readers can quickly decide whether they need to read the steps in detail.
+See also:
+* <a href="https://infra.spec.whatwg.org/#algorithms">some useful definitions
+and terminology</a> from [[!INFRA]]
 
 <h4 id="use-flags-for-states">Use explicit flags for state</h4>
 
-Describing state using explicit flags makes behavior clearer.
+Instead of describing state in prose,
+use explicit flags for state when writing algorithms.
+
 Using explicit flags makes it clear
 whether or not the state changes in different error conditions,
 and makes it clear when the state described by the flags is reset.
@@ -2357,6 +2336,12 @@ Some useful advice on how to write specifications is available elsewhere:
     specifications: Kinds of statements</a> (Ian Hickson, 2006)
   * <a href="https://www.w3.org/TR/qaframe-spec/">QA Framework:
     Specification Guidelines</a> (W3C QA Working Group, 2005)
+  * <a href="https://w3c.github.io/privacy-considerations/">Privacy Considerations for Web Protocols</a>
+  * <a href="https://www.w3.org/TR/security-privacy-questionnaire/">Self-Review Questionnaire: Security and Privacy</a>
+  * <a href="https://w3c.github.io/apa/fast/">Web Technology Accessibility Guidelines</a>
+  * <a href="https://w3c.github.io/bp-i18n-specdev/">Internationalization Best Practices for Spec Developers</a> <!-- also at https://www.w3.org/TR/international-specs/ -->
+
+
 
 <h2 id="acks" class="no-num">Acknowledgments</h2>
 
